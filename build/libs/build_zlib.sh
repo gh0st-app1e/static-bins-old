@@ -14,7 +14,7 @@ export ZLIB_DIR="${BUILD_DIRECTORY}/zlib"
 
 
 build_zlib() (
-  curl -so 'zlib.tar.gz' "${ZLIB_URL}"
+  curl -sLo 'zlib.tar.gz' "${ZLIB_URL}"
   common::extract 'zlib.tar.gz' "${ZLIB_BUILD_DIR}"
   common::safe_cd "${ZLIB_BUILD_DIR}"
 

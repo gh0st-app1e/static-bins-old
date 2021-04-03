@@ -14,7 +14,7 @@ export NCURSES_DIR="${BUILD_DIRECTORY}/ncurses"
 
 # NOTE: ncurses require second compiler for the build machine arch when cross-compiling
 build_ncurses() (
-  curl -so 'ncurses.tar.gz' "${NCURSES_URL}"
+  curl -sLo 'ncurses.tar.gz' "${NCURSES_URL}"
   common::extract 'ncurses.tar.gz' "${NCURSES_BUILD_DIR}"
   common::safe_cd "${NCURSES_BUILD_DIR}"
 

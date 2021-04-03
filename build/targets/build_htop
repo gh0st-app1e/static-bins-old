@@ -8,16 +8,14 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/libs/build_ncurses.sh"
 
 HTOP_VERSION="${HTOP_VERSION:-3.0.5}"
-HTOP_GIT='https://github.com/htop-dev/htop.git'
+HTOP_URL="https://github.com/htop-dev/htop/archive/refs/tags/${HTOP_VERSION}.tar.gz"
 HTOP_BUILD_DIR="${BUILD_DIRECTORY}/htop"
 
 
 build_htop() (
-  git clone "${HTOP_GIT}" "${HTOP_BUILD_DIR}"
+  curl -sLo 'htop.tar.gz' "${HTOP_URL}"
+  common::extract 'htop.tar.gz' "${HTOP_BUILD_DIR}"
   common::safe_cd "${HTOP_BUILD_DIR}"
-  git clean -fdx
-  git checkout "${HTOP_VERSION}"
-  
   ./autogen.sh
   CFLAGS="${GCC_OPTS}" \
     CXXFLAGS="${GXX_OPTS}" \

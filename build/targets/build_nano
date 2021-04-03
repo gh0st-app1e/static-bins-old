@@ -15,7 +15,7 @@ NANO_BUILD_DIR="${BUILD_DIRECTORY}/nano"
 
 
 build_nano() (
-  curl -so 'nano.tar.gz' "${NANO_URL}"
+  curl -sLo 'nano.tar.gz' "${NANO_URL}"
   common::extract 'nano.tar.gz' "${NANO_BUILD_DIR}"
   common::safe_cd "${NANO_BUILD_DIR}"
 

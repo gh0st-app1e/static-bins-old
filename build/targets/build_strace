@@ -7,17 +7,15 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
 STRACE_VERSION="${STRACE_VERSION:-5.11}"
-STRACE_GIT='https://github.com/strace/strace'
+STRACE_URL="https://strace.io/files/${STRACE_VERSION}/strace-${STRACE_VERSION}.tar.xz"
 STRACE_BUILD_DIR="${BUILD_DIRECTORY}/strace"
 
 
 build_strace() (
-  git clone "${STRACE_GIT}" "${STRACE_BUILD_DIR}"
+  curl -sLo 'strace.tar.xz' "${STRACE_URL}"
+  common::extract 'strace.tar.xz' "${STRACE_BUILD_DIR}"
   common::safe_cd "${STRACE_BUILD_DIR}"
-  git clean -fdx
-  git checkout "v${STRACE_VERSION}"
 
-  ./bootstrap
   CMD="CFLAGS=\"${GCC_OPTS}\" "
   CMD+="CXXFLAGS=\"${GXX_OPTS}\" "
   CMD+="LDFLAGS=\"-static -pthread\" "

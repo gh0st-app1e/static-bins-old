@@ -10,17 +10,15 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/libs/build_readline.sh"
 
 SOCAT_VERSION="${SOCAT_VERSION:-1.7.4.1}"
-SOCAT_GIT='https://repo.or.cz/socat.git'
+SOCAT_URL="http://www.dest-unreach.org/socat/download/socat-${SOCAT_VERSION}.tar.gz"
 SOCAT_BUILD_DIR="${BUILD_DIRECTORY}/socat"
 
 
 build_socat() (
-  git clone "${SOCAT_GIT}" "${SOCAT_BUILD_DIR}"
+  curl -sLo 'socat.tar.gz' "${SOCAT_URL}"
+  common::extract 'socat.tar.gz' "${SOCAT_BUILD_DIR}"
   common::safe_cd "${SOCAT_BUILD_DIR}"
-  git clean -fdx
-  git checkout "tag-${SOCAT_VERSION}"
 
-  autoconf
   CFLAGS="${GCC_OPTS}" \
     CXXFLAGS="${GXX_OPTS}" \
     CPPFLAGS="-I${OPENSSL_DIR}/include -I${NCURSES_DIR}/include -I${READLINE_DIR}/include -DNETDB_INTERNAL=-1" \

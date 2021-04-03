@@ -8,15 +8,14 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/libs/build_libpcap.sh"
 
 TCPDUMP_VERSION="${TCPDUMP_VERSION:-4.9.3}"
-TCPDUMP_GIT='https://github.com/the-tcpdump-group/tcpdump.git'
+TCPDUMP_URL="https://www.tcpdump.org/release/tcpdump-${TCPDUMP_VERSION}.tar.gz"
 TCPDUMP_BUILD_DIR="${BUILD_DIRECTORY}/tcpdump"
 
 
 build_tcpdump() (
-  git clone "${TCPDUMP_GIT}" "${TCPDUMP_BUILD_DIR}"
+  curl -sLo 'tcpdump.tar.gz' "${TCPDUMP_URL}"
+  common::extract 'tcpdump.tar.gz' "${TCPDUMP_BUILD_DIR}"
   common::safe_cd "${TCPDUMP_BUILD_DIR}"
-  git clean -fdx
-  git checkout "tcpdump-${TCPDUMP_VERSION}"
 
   CFLAGS="${GCC_OPTS}"\
     CXXFLAGS="${GXX_OPTS}" \

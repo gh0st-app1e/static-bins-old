@@ -6,17 +6,16 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
-LIBPCAP_VERSION="${LIBPCAP_VERSION:-1.9.1}"
-LIBPCAP_GIT='https://github.com/the-tcpdump-group/libpcap.git'
+LIBPCAP_VERSION="${LIBPCAP_VERSION:-1.10.0}"
+LIBPCAP_URL="https://www.tcpdump.org/release/libpcap-${LIBPCAP_VERSION}.tar.gz"
 LIBPCAP_BUILD_DIR="${BUILD_DIRECTORY}/libpcap-src"
 export LIBPCAP_DIR="${BUILD_DIRECTORY}/libpcap"
 
 
 build_libpcap() (
-  git clone "${LIBPCAP_GIT}" "${LIBPCAP_BUILD_DIR}"
+  curl -sLo 'libpcap.tar.gz' "${LIBPCAP_URL}"
+  common::extract 'libpcap.tar.gz' "${LIBPCAP_BUILD_DIR}"
   common::safe_cd "${LIBPCAP_BUILD_DIR}"
-  git clean -fdx
-  git checkout "libpcap-${LIBPCAP_VERSION}"
 
   # Does not support --disable-dependency-tracking 
   CFLAGS="${GCC_OPTS}" \

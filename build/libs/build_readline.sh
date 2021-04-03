@@ -6,16 +6,16 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
-READLINE_GIT='https://git.savannah.gnu.org/git/readline.git'
+READLINE_VERSION=${READLINE_VERSION:-8.1}
+READLINE_URL="ftp://ftp.cwru.edu/pub/bash/readline-${READLINE_VERSION}.tar.gz"
 READLINE_BUILD_DIR="${BUILD_DIRECTORY}/readline-src"
 export READLINE_DIR="${BUILD_DIRECTORY}/readline"
 
 
-# TODO: build release version instead of master
 build_readline() (
-  git clone "${READLINE_GIT}" "${READLINE_BUILD_DIR}"
+  curl -sLo 'readline.tar.gz' "${READLINE_URL}"
+  common::extract 'readline.tar.gz' "${READLINE_BUILD_DIR}"
   common::safe_cd "${READLINE_BUILD_DIR}"
-  git clean -fdx
 
   CFLAGS="${GCC_OPTS}" \
     CXXFLAGS="${GXX_OPTS}" \

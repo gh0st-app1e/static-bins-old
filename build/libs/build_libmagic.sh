@@ -22,7 +22,7 @@ build_libmagic() (
   echo "[i] file utility version on the build host is ${file_version}"
 
   file_url="ftp://ftp.astron.com/pub/file/file-${file_version}.tar.gz"
-  curl -so 'file.tar.gz' "${file_url}"
+  curl -sLo 'file.tar.gz' "${file_url}"
   common::extract 'file.tar.gz' "${LIBMAGIC_BUILD_DIR}"
   common::safe_cd "${LIBMAGIC_BUILD_DIR}"
 
