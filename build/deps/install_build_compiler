@@ -1,0 +1,8 @@
+#!/bin/sh
+MUSLCC_URL='https://more.musl.cc/x86_64-linux-musl/'
+MUSLCC_ARCH='x86_64-linux-musl'
+
+cd /
+curl -so "${MUSLCC_ARCH}-cross.tgz" "${MUSLCC_URL}/${MUSLCC_ARCH}-cross.tgz"
+tar -xf "${MUSLCC_ARCH}-cross.tgz"
+rm "${MUSLCC_ARCH}-cross.tgz"

@@ -1,0 +1,56 @@
+#!/bin/bash
+set -e
+set -x
+set -o pipefail
+
+. "${GITHUB_WORKSPACE}/build/common_lib.sh"
+. "${GITHUB_WORKSPACE}/build/build_lib.sh"
+
+STRACE_VERSION="${STRACE_VERSION:-5.11}"
+STRACE_GIT='https://github.com/strace/strace'
+STRACE_BUILD_DIR="${BUILD_DIRECTORY}/strace"
+
+
+build_strace() (
+  git clone "${STRACE_GIT}" "${STRACE_BUILD_DIR}"
+  common::safe_cd "${STRACE_BUILD_DIR}"
+  git clean -fdx
+  git checkout "v${STRACE_VERSION}"
+
+  ./bootstrap
+  CMD="CFLAGS=\"${GCC_OPTS}\" "
+  CMD+="CXXFLAGS=\"${GXX_OPTS}\" "
+  CMD+="LDFLAGS=\"-static -pthread\" "
+  # NOTE: In the original script CPP (preprocessor) was mistaken
+  #   for CXX (cpp compiler), which caused compilation to fail.
+  # NOTE: strace requires second (native) compiler even on i686. 
+  if [ "$CURRENT_ARCH" != "x86-64" ]; then
+    CMD+="CC_FOR_BUILD=\"/x86_64-linux-musl-cross/bin/x86_64-linux-musl-gcc\" "
+    CMD+="CXX_FOR_BUILD=\"/x86_64-linux-musl-cross/bin/x86_64-linux-musl-g++\" "
+  fi
+  # Without --enable-mpers=check compilation will fail (even native)
+  CMD+="./configure --host=$(build::get_host_triplet) --disable-dependency-tracking --enable-mpers=check"
+  eval "$CMD"
+  make CFLAGS="-w" -j4
+  strip src/strace
+)
+
+main() (
+  if [ "$#" -ne 1 ];then
+    echo "Usage: ${0} <arch>"
+    echo "Example: ${0} x86-64"
+    exit 1
+  fi
+  
+  build::init "$1"
+  # TODO: build libs for stack unwinding, etc. (check strace --version of binary from system package)
+  build_strace
+  #version=$(build::get_binary_version "${BUILD_DIRECTORY}/strace/strace --version 2>&1 | head -n1 | awk '{print \$4}'")
+  cp "${STRACE_BUILD_DIR}/src/strace" "${OUTPUT_DIRECTORY}/strace-${STRACE_VERSION}"
+  echo "[+] Finished building strace ${CURRENT_ARCH}"
+
+  echo ::set-output name=PACKAGED_NAME::"strace-${STRACE_VERSION}-${CURRENT_ARCH}"
+  echo ::set-output name=PACKAGED_NAME_PATH::"${OUTPUT_DIRECTORY}/*"
+)
+
+main "$@"

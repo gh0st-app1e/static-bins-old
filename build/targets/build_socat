@@ -1,0 +1,55 @@
+#!/bin/bash
+set -e
+set -x
+set -o pipefail
+
+. "${GITHUB_WORKSPACE}/build/common_lib.sh"
+. "${GITHUB_WORKSPACE}/build/build_lib.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_openssl.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_ncurses.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_readline.sh"
+
+SOCAT_VERSION="${SOCAT_VERSION:-1.7.4.1}"
+SOCAT_GIT='https://repo.or.cz/socat.git'
+SOCAT_BUILD_DIR="${BUILD_DIRECTORY}/socat"
+
+
+build_socat() (
+  git clone "${SOCAT_GIT}" "${SOCAT_BUILD_DIR}"
+  common::safe_cd "${SOCAT_BUILD_DIR}"
+  git clean -fdx
+  git checkout "tag-${SOCAT_VERSION}"
+
+  autoconf
+  CFLAGS="${GCC_OPTS}" \
+    CXXFLAGS="${GXX_OPTS}" \
+    CPPFLAGS="-I${OPENSSL_DIR}/include -I${NCURSES_DIR}/include -I${READLINE_DIR}/include -DNETDB_INTERNAL=-1" \
+    LDFLAGS="-L${OPENSSL_DIR}/lib -L${NCURSES_DIR}/lib -L${READLINE_DIR}/lib" \
+    ./configure \
+      --host="$(build::get_host_triplet)" \
+      --disable-dependency-tracking
+  make -j4
+  strip socat
+)
+
+main() (
+  if [ "$#" -ne 1 ];then
+    echo "Usage: ${0} <arch>"
+    echo "Example: ${0} x86-64"
+    exit 1
+  fi
+ 
+  build::init "$1"
+  build_openssl
+  build_ncurses
+  build_readline
+  build_socat
+  #version=$(build::get_binary_version "${BUILD_DIRECTORY}/socat/socat -V | grep 'socat version' | awk '{print \$3}'")
+  cp "${SOCAT_BUILD_DIR}/socat" "${OUTPUT_DIRECTORY}/socat-${SOCAT_VERSION}"
+  echo "[+] Finished building socat for ${CURRENT_ARCH}"
+
+  echo ::set-output name=PACKAGED_NAME::"socat-${SOCAT_VERSION}-${CURRENT_ARCH}"
+  echo ::set-output name=PACKAGED_NAME_PATH::"${OUTPUT_DIRECTORY}/*"
+)
+
+main "$@"

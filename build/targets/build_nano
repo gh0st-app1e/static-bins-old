@@ -1,0 +1,55 @@
+#!/bin/bash
+set -e
+set -x
+set -o pipefail
+
+. "${GITHUB_WORKSPACE}/build/common_lib.sh"
+. "${GITHUB_WORKSPACE}/build/build_lib.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_ncurses.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_libmagic.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_zlib.sh"
+
+NANO_VERSION="${NANO_VERSION:-5.6.1}"
+NANO_URL="https://www.nano-editor.org/dist/v${NANO_VERSION%%.*}/nano-${NANO_VERSION}.tar.gz"
+NANO_BUILD_DIR="${BUILD_DIRECTORY}/nano"
+
+
+build_nano() (
+  curl -so 'nano.tar.gz' "${NANO_URL}"
+  common::extract 'nano.tar.gz' "${NANO_BUILD_DIR}"
+  common::safe_cd "${NANO_BUILD_DIR}"
+
+  CFLAGS="${GCC_OPTS}" \
+    CXXFLAGS="${GXX_OPTS}" \
+    CPPFLAGS="-I${NCURSES_DIR}/include -I${LIBMAGIC_DIR}/include -I${ZLIB_DIR}/include" \
+    LDFLAGS="-L${NCURSES_DIR}/lib -L${LIBMAGIC_DIR}/lib -L${ZLIB_DIR}/lib" \
+    ./configure \
+      --host="$(build::get_host_triplet)" \
+      --disable-dependency-tracking \
+      --enable-utf8 \
+      --disable-nls
+  make -j4
+  strip src/nano
+)
+
+main() (
+  if [ "$#" -ne 1 ]; then
+    echo "Usage: ${0} <arch>"
+    echo "Example: ${0} x86-64"
+    exit 1
+  fi
+ 
+  build::init "$1"
+  build_ncurses
+  build_libmagic
+  build_zlib
+  build_nano
+  #version=$(build::get_binary_version "${BUILD_DIRECTORY}/nano/nano --version | grep 'version' | cut -d' ' -f5")
+  cp "${NANO_BUILD_DIR}/src/nano" "${OUTPUT_DIRECTORY}/nano-${NANO_VERSION}"
+  echo "[+] Finished building nano for ${CURRENT_ARCH}"
+
+  echo ::set-output name=PACKAGED_NAME::"nano-${NANO_VERSION}-${CURRENT_ARCH}"
+  echo ::set-output name=PACKAGED_NAME_PATH::"${OUTPUT_DIRECTORY}/*"
+)
+
+main "$@"

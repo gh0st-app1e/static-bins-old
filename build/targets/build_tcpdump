@@ -1,0 +1,50 @@
+#!/bin/bash
+set -e
+set -x
+set -o pipefail
+
+. "${GITHUB_WORKSPACE}/build/common_lib.sh"
+. "${GITHUB_WORKSPACE}/build/build_lib.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_libpcap.sh"
+
+TCPDUMP_VERSION="${TCPDUMP_VERSION:-4.9.3}"
+TCPDUMP_GIT='https://github.com/the-tcpdump-group/tcpdump.git'
+TCPDUMP_BUILD_DIR="${BUILD_DIRECTORY}/tcpdump"
+
+
+build_tcpdump() (
+  git clone "${TCPDUMP_GIT}" "${TCPDUMP_BUILD_DIR}"
+  common::safe_cd "${TCPDUMP_BUILD_DIR}"
+  git clean -fdx
+  git checkout "tcpdump-${TCPDUMP_VERSION}"
+
+  CFLAGS="${GCC_OPTS}"\
+    CXXFLAGS="${GXX_OPTS}" \
+    CPPFLAGS="-static -I${LIBPCAP_DIR}/include" \
+    LDFLAGS="-static -L${LIBPCAP_DIR}/lib" \
+    ./configure \
+      --host="$(build::get_host_triplet)" \
+      --disable-dependency-tracking
+  make -j4
+  strip tcpdump
+)
+
+main() (
+  if [ "$#" -ne 1 ]; then
+    echo "Usage: ${0} <arch>"
+    echo "Example: ${0} x86-64"
+    exit 1
+  fi
+
+  build::init "$1"
+  build_libpcap
+  build_tcpdump
+  #real_version="$(build::get_binary_version "${BUILD_DIRECTORY}/tcpdump/tcpdump --version 2>&1 | head -n1 | awk '{print \$3}'")"
+  cp "${TCPDUMP_BUILD_DIR}/tcpdump" "${OUTPUT_DIRECTORY}/tcpdump-${TCPDUMP_VERSION}"
+  echo "[+] Finished building tcpdump for ${CURRENT_ARCH}"
+
+  echo ::set-output name=PACKAGED_NAME::"tcpdump-${TCPDUMP_VERSION}-${CURRENT_ARCH}"
+  echo ::set-output name=PACKAGED_NAME_PATH::"${OUTPUT_DIRECTORY}/*"
+)
+
+main "$@"

@@ -1,0 +1,26 @@
+#!/bin/sh
+# Installs common dependencies which are very likely required by nearly any build.
+# 'apk update' should be run prior to calling this script.
+
+apk add \
+  bash \
+  coreutils \
+  util-linux \
+  file \
+  perl \
+  gawk \
+  curl \
+  git \
+  flex \
+  bison \
+  autoconf \
+  automake \
+  m4 \
+  make \
+  cmake \
+  libtool \
+  pkgconf \
+  texinfo \
+  zip \
+  qemu-arm \
+  qemu-aarch64

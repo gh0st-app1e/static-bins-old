@@ -1,0 +1,56 @@
+#!/bin/bash
+set -e
+set -x
+set -o pipefail
+
+. "${GITHUB_WORKSPACE}/build/common_lib.sh"
+. "${GITHUB_WORKSPACE}/build/build_lib.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_ncurses.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_libevent.sh"
+
+TMUX_VERSION="${TMUX_VERSION:-3.1c}"
+TMUX_GIT='https://github.com/tmux/tmux.git'
+TMUX_BUILD_DIR="${BUILD_DIRECTORY}/tmux"
+
+
+build_tmux() (
+  git clone "${TMUX_GIT}" "${TMUX_BUILD_DIR}"
+  common::safe_cd "${TMUX_BUILD_DIR}"
+  git clean -fdx
+  git checkout "${TMUX_VERSION}"
+  
+  ./autogen.sh
+  CFLAGS="${GCC_OPTS}" \
+    CXXFLAGS="${GXX_OPTS}" \
+    CPPFLAGS="-I${NCURSES_DIR}/include -I${LIBEVENT_DIR}/include " \
+    LDFLAGS="-L${NCURSES_DIR}/lib -L${LIBEVENT_DIR}/lib -static " \
+    ./configure \
+      --host="$(build::get_host_triplet)" \
+      --disable-dependency-tracking \
+      --disable-shared \
+      --enable-static
+  make -j4
+  strip tmux
+)
+
+main() (
+  if [ "$#" -ne 1 ]; then
+    echo "Usage: ${0} <arch>"
+    echo "Example: ${0} x86-64"
+    exit 1
+  fi
+
+  build::init "$1"
+  build_ncurses
+  build_libevent
+  build_tmux
+
+  #real_version="$(build::get_binary_version "${BUILD_DIRECTORY}/tmux -V | awk '{print \$2}'")"
+  cp "${TMUX_BUILD_DIR}/tmux" "${OUTPUT_DIRECTORY}/tmux-${TMUX_VERSION}"
+  echo "[+] Finished building tmux for ${CURRENT_ARCH}"
+
+  echo ::set-output name=PACKAGED_NAME::"tmux-${TMUX_VERSION}-${CURRENT_ARCH}"
+  echo ::set-output name=PACKAGED_NAME_PATH::"${OUTPUT_DIRECTORY}/*"
+)
+
+main "$@"

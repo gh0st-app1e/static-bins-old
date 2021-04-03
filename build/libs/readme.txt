@@ -1,0 +1,1 @@
+Dependency building scripts should be sourced by target building scripts which require those dependencies.
