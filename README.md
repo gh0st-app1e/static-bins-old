@@ -5,7 +5,7 @@ Currently building with Github Actions, but it is pretty easy to create equivale
 Build framework, repo organization and a few recipes are inspired by https://github.com/ernw/static-toolbox.
 
 | Tool | Status | Version | Comments |
-| ---- | ------ | --------| -------- |
+| :--- | :----- | :------ | :------- |
 | [htop](https://github.com/heart-render/static-bins/actions/workflows/build-htop.yml) | ![htop](https://github.com/heart-render/static-bins/actions/workflows/build-htop.yml/badge.svg?branch=master) | 3.0.5 | - |
 | [nano](https://github.com/heart-render/static-bins/actions/workflows/build-nano.yml) | ![nano](https://github.com/heart-render/static-bins/actions/workflows/build-nano.yml/badge.svg?branch=master) | 5.6.1 | with libmagic, zlib and utf-8 support |
 | [socat](https://github.com/heart-render/static-bins/actions/workflows/build-socat.yml) | ![socat](https://github.com/heart-render/static-bins/actions/workflows/build-socat.yml/badge.svg?branch=master) | 1.7.4.1 | - |
