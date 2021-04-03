@@ -29,7 +29,7 @@ build_strace() (
   # Without --enable-mpers=check compilation will fail (even native)
   CMD+="./configure --host=$(build::get_host_triplet) --disable-dependency-tracking --enable-mpers=check"
   eval "$CMD"
-  make CFLAGS="-w" -j4
+  make CFLAGS="-w" -j"$(nproc)"
   strip src/strace
 )
 

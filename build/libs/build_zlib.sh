@@ -26,7 +26,7 @@ build_zlib() (
     ./configure \
       --prefix="${ZLIB_DIR}" \
       --static
-  make -j4
+  make -j"$(nproc)"
   make install
 
   echo "[+] Finished building zlib for ${CURRENT_ARCH}"

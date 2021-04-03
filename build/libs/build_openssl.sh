@@ -36,7 +36,7 @@ build_openssl() (
       no-shared \
       --prefix=${OPENSSL_DIR} \
       "$(get_openssl_arch)"
-  make -j4
+  make -j"$(nproc)"
   # Do not install mans to speed up the process
   make install_sw
 

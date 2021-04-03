@@ -38,7 +38,7 @@ build_libmagic() (
       --disable-bzlib \
       --disable-xzlib \
       --disable-libseccomp
-  make -j4
+  make -j"$(nproc)"
   make install
 
   echo "[+] Finished building libmagic for ${CURRENT_ARCH}"

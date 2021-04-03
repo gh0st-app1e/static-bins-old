@@ -26,7 +26,7 @@ build_libevent() (
       --prefix="${LIBEVENT_DIR}" \
       --disable-shared \
       --disable-openssl
-  make -j4
+  make -j"$(nproc)"
   make install
 
   echo "[+] Finished building libevent for ${CURRENT_ARCH}"

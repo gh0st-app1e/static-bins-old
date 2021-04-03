@@ -26,7 +26,7 @@ build_socat() (
     ./configure \
       --host="$(build::get_host_triplet)" \
       --disable-dependency-tracking
-  make -j4
+  make -j"$(nproc)"
   strip socat
 )
 

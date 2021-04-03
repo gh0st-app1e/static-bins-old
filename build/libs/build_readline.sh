@@ -25,7 +25,7 @@ build_readline() (
       --prefix="${READLINE_DIR}" \
       --disable-shared \
       --enable-static
-  make -j4
+  make -j"$(nproc)"
   make install
 
   echo "[+] Finished building readline for ${CURRENT_ARCH}"

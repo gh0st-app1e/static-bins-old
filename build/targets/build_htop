@@ -26,7 +26,7 @@ build_htop() (
       --disable-dependency-tracking \
       --enable-static \
       --enable-unicode
-  make -j4
+  make -j"$(nproc)"
   strip htop
 )
 

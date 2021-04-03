@@ -28,7 +28,7 @@ build_nano() (
       --disable-dependency-tracking \
       --enable-utf8 \
       --disable-nls
-  make -j4
+  make -j"$(nproc)"
   strip src/nano
 )
 

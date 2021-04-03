@@ -27,7 +27,7 @@ build_openssh() (
       --with-ssl-engine \
       --with-zlib="${ZLIB_DIR}" \
       --with-pie
-  make -j4
+  make -j"$(nproc)"
   strip ssh sshd
 )
 

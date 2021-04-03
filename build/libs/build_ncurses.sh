@@ -31,7 +31,7 @@ build_ncurses() (
     CMD+="--with-build-cc=/x86_64-linux-musl-cross/bin/x86_64-linux-musl-gcc"
   fi
   eval "${CMD}"
-  make -j4
+  make -j"$(nproc)"
 
   # Installation is required as ncurses adjusts headers during it
   #   (e.g. generates headers for ncursesw).

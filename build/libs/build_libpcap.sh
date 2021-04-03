@@ -25,7 +25,7 @@ build_libpcap() (
       --prefix="${LIBPCAP_DIR}" \
       --disable-shared \
       --with-pcap=linux
-  make -j4
+  make -j"$(nproc)"
   make install
 
   echo "[+] Finished building libpcap for ${CURRENT_ARCH}"

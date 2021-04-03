@@ -27,7 +27,7 @@ build_tmux() (
       --disable-dependency-tracking \
       --disable-shared \
       --enable-static
-  make -j4
+  make -j"$(nproc)"
   strip tmux
 )
 
