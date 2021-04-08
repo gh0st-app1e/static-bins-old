@@ -6,6 +6,14 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
+. "${GITHUB_WORKSPACE}/build/libs/build_zlib.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_libargp.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_libfts.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_libobstack.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_elfutils.sh"
+
+. "${GITHUB_WORKSPACE}/build/libs/build_libunwind.sh"
+
 STRACE_VERSION="${STRACE_VERSION:-5.11}"
 STRACE_URL="https://strace.io/files/${STRACE_VERSION}/strace-${STRACE_VERSION}.tar.xz"
 STRACE_BUILD_DIR="${BUILD_DIRECTORY}/strace"
@@ -42,6 +50,14 @@ main() (
   
   build::init "$1"
   # TODO: build libs for stack unwinding, etc. (check strace --version of binary from system package)
+  build_zlib
+  build_libargp
+  build_libfts
+  build_libobstack
+  build_elfutils
+
+  build_libunwind
+  
   build_strace
   #version=$(build::get_binary_version "${BUILD_DIRECTORY}/strace/strace --version 2>&1 | head -n1 | awk '{print \$4}'")
   cp "${STRACE_BUILD_DIR}/src/strace" "${OUTPUT_DIRECTORY}/strace-${STRACE_VERSION}"
