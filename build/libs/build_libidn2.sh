@@ -12,6 +12,9 @@ LIBIDN2_BUILD_DIR="${BUILD_DIRECTORY}/libidn2-src"
 export LIBIDN2_DIR="${BUILD_DIRECTORY}/libidn2"
 
 
+# Need to add for cross-compile: !!!
+# Libiconv:          
+#  Libunistring
 build_libidn2() (
   curl -sLo 'libidn2.tar.gz' "${LIBIDN2_URL}"
   common::extract 'libidn2.tar.gz' "${LIBIDN2_BUILD_DIR}"

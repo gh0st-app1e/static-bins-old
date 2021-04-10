@@ -9,7 +9,7 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/libs/build_openssl.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_libssh.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_libidn2.sh"
-
+. "${GITHUB_WORKSPACE}/build/libs/build_pcre.sh"
 
 HYDRA_VERSION="${HYDRA_VERSION:-9.2}"
 HYDRA_URL="https://github.com/vanhauser-thc/thc-hydra/archive/refs/tags/v${HYDRA_VERSION}.tar.gz"
@@ -23,8 +23,8 @@ build_hydra() (
 
   CFLAGS="${GCC_OPTS}" \
     CXXFLAGS="${GXX_OPTS}" \
-    CPPFLAGS="-I${OPENSSL_DIR}/include -I${LIBSSH_DIR}/include" \
-    LDFLAGS="-L${OPENSSL_DIR}/lib -L${LIBSSH_DIR}/lib" \
+    CPPFLAGS="-I${OPENSSL_DIR}/include -I${LIBSSH_DIR}/include -I${LIBIDN2_DIR}/include -I${LIBPCRE_DIR}/include" \
+    LDFLAGS="-L${OPENSSL_DIR}/lib -L${LIBSSH_DIR}/lib -L${LIBIDN2_DIR}/lib -L${LIBPCRE_DIR}/lib" \
     ./configure \
       --host="$(build::get_host_triplet)" \
       --disable-dependency-tracking
@@ -33,7 +33,6 @@ build_hydra() (
 )
 
 # deps to do:
-# libidn11-dev libpcre3-dev \
 # libgtk2.0-dev libmysqlclient-dev libpq-dev libsvn-dev \
 # firebird-dev libmemcached-dev libgpg-error-dev \
 # libgcrypt11-dev libgcrypt20-dev
@@ -45,11 +44,11 @@ main() (
   fi
  
   build::init "$1"
-  build_zlib
-  build_openssl
-  build_libssh
-  build_libidn2
-
+  # build_zlib
+  # build_openssl
+  # build_libssh
+  # build_libidn2
+  build_pcre
 
 
 

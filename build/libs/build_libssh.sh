@@ -37,6 +37,7 @@ build_libssh() (
       -DZLIB_INCLUDE_DIR="${ZLIB_DIR}/include" \
       -DZLIB_LIBRARY="${ZLIB_DIR}/lib/libz.a" \
       -DOPENSSL_ROOT_DIR="${OPENSSL_DIR}" \
+      -DWITH_SSH1=ON \
       "${LIBSSH_SRC_DIR}"
   make -j"$(nproc)"
   make install
