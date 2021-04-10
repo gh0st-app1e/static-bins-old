@@ -87,14 +87,13 @@ build_hydra() (
       --host="$(build::get_host_triplet)" \
       --disable-dependency-tracking \
       --prefix="${HYDRA_DEPS_DIR}" \
-      --disable-xhydra \
-      --debug
-      # --debug - nice option!
+      --disable-xhydra
+    # --debug - nice option!
   make LDFLAGS="-static" -j"$(nproc)"
   strip hydra
 )
 
-# TODO: add deps for features
+# TODO: add deps for more features
 # libgtk2.0-dev - for gui (xhydra)
 # libmysqlclient-dev - for mysql (massive, idk if portable)
 # libpq-dev - for postgres
@@ -116,6 +115,7 @@ main() (
   build_libssh
   build_libidn
   build_pcre
+  # For some reason gcrypt fails to link
   # build_libgpgerror
   # build_libgcrypt
   build_ncurses
