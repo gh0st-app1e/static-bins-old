@@ -27,8 +27,6 @@ build_libssh() (
 # -- ********************************************
   CFLAGS="${GCC_OPTS}" \
     CXXFLAGS="${GXX_OPTS}" \
-    CPPFLAGS="-I${OPENSSL_DIR}/include -I${ZLIB_DIR}/include" \
-    LDFLAGS="-L${OPENSSL_DIR}/lib -L${ZLIB_DIR}/lib" \
     cmake \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX="${LIBSSH_DIR}" \
