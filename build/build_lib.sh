@@ -34,6 +34,7 @@ build::init() {
     *)  common::print_to_stderr "[!] Arch '$1' is not supported"; exit 1 ;;
   esac
   # Every binary/library is built by a separate script - need to use env var.
+  # CURRENT_ARCH is the arch of the host which will run the built binaries.
   export CURRENT_ARCH="${1}"
 
   if [ ! -d "${BUILD_DIRECTORY}" ]; then
@@ -46,7 +47,7 @@ build::init() {
 
 
 #######################################
-# Return host triplet for the selected architecture CURRENT_ARCH.
+# Get host triplet for CURRENT_ARCH.
 # Globals:
 #   CURRENT_ARCH - r
 # Arguments:
@@ -60,7 +61,27 @@ build::get_host_triplet() (
     'x86-64')   echo 'x86_64-linux-musl'    ;;
     'armhf')    echo 'arm-linux-musleabihf' ;;
     'aarch64')  echo 'aarch64-linux-musl'   ;;
-    *)          common::print_to_stderr "[!] Arch '${CURRENT_ARCH}' is not supported" ;;
+    *)          common::print_to_stderr "[!] Arch '${CURRENT_ARCH}' is not supported"; exit 1 ;;
+  esac
+)
+
+
+#######################################
+# Get bitness of CURRENT_ARCH.
+# Globals:
+#   CURRENT_ARCH - r
+# Arguments:
+#   None
+# Outputs:
+#   Arch bitness -> stdout
+#######################################
+build::get_current_arch_bitness() (
+  case "${CURRENT_ARCH}" in
+    'x86')      echo '32' ;;
+    'x86-64')   echo '64' ;;
+    'armhf')    echo '32' ;;
+    'aarch64')  echo '64' ;;
+    *)          common::print_to_stderr "[!] Arch '${CURRENT_ARCH}' is not supported"; exit 1 ;;
   esac
 )
 

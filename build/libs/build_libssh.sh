@@ -16,6 +16,7 @@ export LIBSSH_DIR="${BUILD_DIRECTORY}/libssh"
 # Requires:
 # - openssl
 # - zlib
+# May install lib in ${BUILD_DIRECTORY}/lib64! 
 build_libssh() (
   curl -sLo 'libssh.tar.xz' "${LIBSSH_URL}"
   common::extract 'libssh.tar.xz' "${LIBSSH_SRC_DIR}"

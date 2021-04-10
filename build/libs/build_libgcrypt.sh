@@ -12,6 +12,8 @@ LIBGCRYPT_BUILD_DIR="${BUILD_DIRECTORY}/libgcrypt-src"
 export LIBGCRYPT_DIR="${BUILD_DIRECTORY}/libgcrypt"
 
 
+# Requires:
+# - libgpg-error
 build_libgcrypt() (
   curl -sLo 'libgcrypt.tar.bz2' "${LIBGCRYPT_URL}"
   common::extract 'libgcrypt.tar.bz2' "${LIBGCRYPT_BUILD_DIR}"
@@ -24,7 +26,8 @@ build_libgcrypt() (
       --disable-dependency-tracking \
       --prefix="${LIBGCRYPT_DIR}" \
       --disable-shared \
-      --enable-static
+      --enable-static \
+      --with-libgpg-error-prefix="${LIBGPGERROR_DIR}"
   make -j"$(nproc)"
   make install
 

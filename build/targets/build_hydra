@@ -8,11 +8,14 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/libs/build_zlib.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_openssl.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_libssh.sh"
-. "${GITHUB_WORKSPACE}/build/libs/build_libidn2.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_libidn.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_pcre.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_libgpg-error.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_libgcrypt.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_ncurses.sh"
 
-HYDRA_VERSION="${HYDRA_VERSION:-9.2}"
+# Hydra requires a lot of hacking in ./configure, every new version should be checked for compatibility very carefully!
+HYDRA_VERSION='9.2'
 HYDRA_URL="https://github.com/vanhauser-thc/thc-hydra/archive/refs/tags/v${HYDRA_VERSION}.tar.gz"
 HYDRA_BUILD_DIR="${BUILD_DIRECTORY}/hydra"
 
@@ -22,30 +25,83 @@ build_hydra() (
   common::extract 'hydra.tar.gz' "${HYDRA_BUILD_DIR}"
   common::safe_cd "${HYDRA_BUILD_DIR}"
 
+  # Hydra's ./configure does not accept custom lib paths except for openssl (and even openssl option is buggy).
+  #   Although, it will look in $PREFIX/{include,lib} ($PREFIX is install prefix, set up with --prefix=).
+  #   Sadly, it fails to detects some libraries installed there.
+  #   Moreover, $PREFIX/{include,lib} comes AFTER system dirs, which almost guarantees cross-compilation fail.
+  #   Thus, we will have to edit ./configure manually (and better - file a pull request with custom lib path options).
+  #   For some libs there are convenient *LIBNAME*_PATH variables, we can (ab)use them.
+  # NOTE: These hacks are tested and should work, although paths are still appended AFTER system directories.
+  sed -i '/^SSL_IPATH=""/s:SSL_IPATH="":SSL_IPATH="'"${OPENSSL_DIR}/include"'":' configure
+  sed -i '/^SSL_PATH=""/s:SSL_PATH="":SSL_PATH="'"${OPENSSL_DIR}/lib"'":' configure
+  sed -i '/^CRYPTO_PATH=""/s:CRYPTO_PATH="":CRYPTO_PATH="'"${OPENSSL_DIR}/lib"'":' configure
+  sed -i '/^SSH_IPATH=""/s:SSH_IPATH="":SSH_IPATH="'"${LIBSSH_DIR}/include"'":' configure
+  if [ "$(build::get_current_arch_bitness)" = '64' ]; then
+    sed -i '/^SSH_PATH=""/s:SSH_PATH="":SSH_PATH="'"${LIBSSH_DIR}/lib64"'":' configure
+  else
+    sed -i '/^SSH_PATH=""/s:SSH_PATH="":SSH_PATH="'"${LIBSSH_DIR}/lib"'":' configure
+  fi
+  sed -i '/^IDN_PATH=""/s:IDN_PATH="":IDN_PATH="'"${LIBIDN_DIR}/lib"'":' configure
+  sed -i '/^IDN_IPATH=""/s:IDN_IPATH="":IDN_IPATH="'"${LIBIDN_DIR}/include"'":' configure
+  sed -i '/^PCRE_PATH=""/s:PCRE_PATH="":PCRE_PATH="'"${PCRE_DIR}/lib"'":' configure
+  sed -i '/^PCRE_IPATH=""/s:PCRE_IPATH="":PCRE_IPATH="'"${PCRE_DIR}/include"'":' configure
+  sed -i '/^CURSES_PATH=""/s:CURSES_PATH="":CURSES_PATH="'"${NCURSES_DIR}/lib"'":' configure
+  sed -i '/^CURSES_IPATH=""/s:CURSES_IPATH="":CURSES_IPATH="'"${NCURSES_DIR}/include"'":' configure
+
+  # Unfortunately, some libs are assumed to be only in system dirs.
+  # These will take more effort...
+  # First, we need to prepend their paths to the list of system lib dirs.
+  # As a result, they will be detected (=> enabling some macros and stuff), but not passed to CPP/LD.
+  # TODO: deal with multiple insertions if multiple lines like ^INCDIRS=" are present.
+  sed -i '/^INCDIRS="/a INCDIRS="$HYDRA_ADDITIONAL_INCLUDE_DIRS $INCDIRS"' configure
+  sed -i '/^LIBDIRS="/a LIBDIRS="$HYDRA_ADDITIONAL_LIB_DIRS $LIBDIRS"' configure
+
+  # Second, we need to add them to CPP/LD flags.
+  sed -i '/^if \[ -n "\$CURSES_IPATH" ]; then/i XIPATHS="$HYDRA_ADDITIONAL_CPP_DIRS_OPTS $XIPATHS"' configure
+  sed -i '/^if \[ -n "\$CURSES_IPATH" ]; then/i XLIBPATHS="$HYDRA_ADDITIONAL_LD_DIRS_OPTS $XLIBPATHS"' configure
+
+  # Finally, pass those unlucky libraries.
+  include_dirs="${ZLIB_DIR}/include "
+  #include_dirs+="${LIBGPGERROR_DIR}/include "
+  #include_dirs+="${LIBGCRYPT_DIR}/include "
+
+  lib_dirs="${ZLIB_DIR}/lib "
+  #lib_dirs+="${LIBGPGERROR_DIR}/lib "
+  #lib_dirs+="${LIBGCRYPT_DIR}/lib "
+
+  cpp_opts="-I${ZLIB_DIR}/include "
+  #cpp_opts+="-I${LIBGPGERROR_DIR}/include "
+  #cpp_opts+="-I${LIBGCRYPT_DIR}/include "
+
+  ld_opts="-L${ZLIB_DIR}/lib "
+  #ld_opts+="-L${LIBGPGERROR_DIR}/lib "
+  #ld_opts+="-L${LIBGCRYPT_DIR}/lib "
+
   CFLAGS="${GCC_OPTS}" \
     CXXFLAGS="${GXX_OPTS}" \
-    CPPFLAGS="-I${LIBSSH_DIR}/include -I${LIBIDN2_DIR}/include -I${PCRE_DIR}/include -I${LIBGCRYPT_DIR}/include" \
-    LDFLAGS="-L${LIBSSH_DIR}/lib -L${LIBIDN2_DIR}/lib -L${PCRE_DIR}/lib -L${LIBGCRYPT_DIR}/lib -static" \
+    HYDRA_ADDITIONAL_INCLUDE_DIRS="${include_dirs}" \
+    HYDRA_ADDITIONAL_LIB_DIRS="${lib_dirs}" \
+    HYDRA_ADDITIONAL_CPP_DIRS_OPTS="${cpp_opts}" \
+    HYDRA_ADDITIONAL_LD_DIRS_OPTS="${ld_opts}" \
     ./configure \
       --host="$(build::get_host_triplet)" \
       --disable-dependency-tracking \
-      --with-ssl="${OPENSSL_DIR}/include" \
-      --with-ssl-lib="${OPENSSL_DIR}/lib" \
-      --disable-xhydra
-  make -j"$(nproc)"
+      --prefix="${HYDRA_DEPS_DIR}" \
+      --disable-xhydra \
+      --debug
+      # --debug - nice option!
+  make LDFLAGS="-static" -j"$(nproc)"
   strip hydra
 )
 
 # TODO: add deps for features
-# libgtk2.0-dev - for gui only???
-# libmysqlclient-dev - massive, idk if portable
+# libgtk2.0-dev - for gui (xhydra)
+# libmysqlclient-dev - for mysql (massive, idk if portable)
 # libpq-dev - for postgres
-# libsvn-dev 
-# firebird-dev
-# libmemcached-dev
-# libgpg-error-dev
-# libgcrypt11-dev - why TF hydra depends on such old stuff which is not in the repos anymore?
-# libgcrypt20-dev
+# libsvn-dev - SVN
+# firebird-dev - firebird
+# libmemcached-dev - memcached
+# + something for RDP
 main() (
   if [ "$#" -ne 1 ]; then
     echo "Usage: ${0} <arch>"
@@ -54,15 +110,18 @@ main() (
   fi
  
   build::init "$1"
-  # build_zlib
-  # build_openssl
-  # build_libssh
-  # build_libidn2
-  # build_pcre
-  build_libgcrypt
+
+  build_zlib
+  build_openssl
+  build_libssh
+  build_libidn
+  build_pcre
+  # build_libgpgerror
+  # build_libgcrypt
+  build_ncurses
 
   build_hydra
-  #version=$(build::get_binary_version "${BUILD_DIRECTORY}/hydra/hydra -V | grep 'hydra version' | awk '{print \$3}'")
+
   cp "${HYDRA_BUILD_DIR}/hydra" "${OUTPUT_DIRECTORY}/hydra-${HYDRA_VERSION}"
   echo "[+] Finished building hydra for ${CURRENT_ARCH}"
 

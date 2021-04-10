@@ -36,8 +36,9 @@ build_libidn2() (
       --disable-dependency-tracking \
       --prefix="${LIBIDN2_DIR}" \
       --disable-shared \
-      --disable-nls
-      # --disable-valgrind-tests
+      --enable-static \
+      --disable-nls \
+      --disable-valgrind-tests
   make -j"$(nproc)"
   make install
 
