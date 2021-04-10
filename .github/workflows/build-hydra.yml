@@ -1,0 +1,106 @@
+name: hydra
+on:
+  workflow_dispatch
+jobs:
+  build-x86:
+    name: Build for x86
+    runs-on: ubuntu-latest
+    container: muslcc/x86_64:i686-linux-musl
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          apk update && \
+          sh "$GITHUB_WORKSPACE/build/deps/install_common_deps_alpine" && \
+          rm -rf /var/cache/apk/*
+
+      - name: Build
+        id: build_hydra
+        run: bash "$GITHUB_WORKSPACE/build/targets/build_hydra" x86
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.build_hydra.outputs.PACKAGED_NAME }}
+          path: ${{ steps.build_hydra.outputs.PACKAGED_NAME_PATH }}
+
+  build-x64:
+    name: Build for x64
+    runs-on: ubuntu-latest
+    container: muslcc/x86_64:x86_64-linux-musl
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          apk update && \
+          sh "$GITHUB_WORKSPACE/build/deps/install_common_deps_alpine" && \
+          rm -rf /var/cache/apk/*
+
+      - name: Build
+        id: build_hydra
+        run: bash "$GITHUB_WORKSPACE/build/targets/build_hydra" x86-64
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.build_hydra.outputs.PACKAGED_NAME }}
+          path: ${{ steps.build_hydra.outputs.PACKAGED_NAME_PATH }}
+  
+  build-armhf:
+    name: Build for ARMhf
+    runs-on: ubuntu-latest
+    container: muslcc/x86_64:arm-linux-musleabihf
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          apk update && \
+          sh "$GITHUB_WORKSPACE/build/deps/install_common_deps_alpine" && \
+          rm -rf /var/cache/apk/*
+
+      - name: Install build compiler
+        run: sh "$GITHUB_WORKSPACE/build/deps/install_build_compiler"
+
+      - name: Build
+        id: build_hydra
+        run: bash "$GITHUB_WORKSPACE/build/targets/build_hydra" armhf
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.build_hydra.outputs.PACKAGED_NAME }}
+          path: ${{ steps.build_hydra.outputs.PACKAGED_NAME_PATH }}
+
+  build-aarch64:
+    name: Build for AArch64
+    runs-on: ubuntu-latest
+    container: muslcc/x86_64:aarch64-linux-musl
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          apk update && \
+          sh "$GITHUB_WORKSPACE/build/deps/install_common_deps_alpine" && \
+          rm -rf /var/cache/apk/*
+
+      - name: Install build compiler
+        run: sh "$GITHUB_WORKSPACE/build/deps/install_build_compiler"
+
+      - name: Build
+        id: build_hydra
+        run: bash "$GITHUB_WORKSPACE/build/targets/build_hydra" aarch64
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.build_hydra.outputs.PACKAGED_NAME }}
+          path: ${{ steps.build_hydra.outputs.PACKAGED_NAME_PATH }}
+          

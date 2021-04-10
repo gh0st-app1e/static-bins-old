@@ -32,50 +32,65 @@ build_hydra() (
   #   Thus, we will have to edit ./configure manually (and better - file a pull request with custom lib path options).
   #   For some libs there are convenient *LIBNAME*_PATH variables, we can (ab)use them.
   # NOTE: These hacks are tested and should work, although paths are still appended AFTER system directories.
-  sed -i '/^SSL_IPATH=""/s:SSL_IPATH="":SSL_IPATH="'"${OPENSSL_DIR}/include"'":' configure
-  sed -i '/^SSL_PATH=""/s:SSL_PATH="":SSL_PATH="'"${OPENSSL_DIR}/lib"'":' configure
-  sed -i '/^CRYPTO_PATH=""/s:CRYPTO_PATH="":CRYPTO_PATH="'"${OPENSSL_DIR}/lib"'":' configure
-  sed -i '/^SSH_IPATH=""/s:SSH_IPATH="":SSH_IPATH="'"${LIBSSH_DIR}/include"'":' configure
-  if [ "$(build::get_current_arch_bitness)" = '64' ]; then
-    sed -i '/^SSH_PATH=""/s:SSH_PATH="":SSH_PATH="'"${LIBSSH_DIR}/lib64"'":' configure
-  else
-    sed -i '/^SSH_PATH=""/s:SSH_PATH="":SSH_PATH="'"${LIBSSH_DIR}/lib"'":' configure
-  fi
-  sed -i '/^IDN_PATH=""/s:IDN_PATH="":IDN_PATH="'"${LIBIDN_DIR}/lib"'":' configure
-  sed -i '/^IDN_IPATH=""/s:IDN_IPATH="":IDN_IPATH="'"${LIBIDN_DIR}/include"'":' configure
-  sed -i '/^PCRE_PATH=""/s:PCRE_PATH="":PCRE_PATH="'"${PCRE_DIR}/lib"'":' configure
-  sed -i '/^PCRE_IPATH=""/s:PCRE_IPATH="":PCRE_IPATH="'"${PCRE_DIR}/include"'":' configure
-  sed -i '/^CURSES_PATH=""/s:CURSES_PATH="":CURSES_PATH="'"${NCURSES_DIR}/lib"'":' configure
-  sed -i '/^CURSES_IPATH=""/s:CURSES_IPATH="":CURSES_IPATH="'"${NCURSES_DIR}/include"'":' configure
+  # NOTE: If openssl is not found in system paths ($INCDIRS), it is considered outdated by ./configure.
+  # Because of these drawbacks, it's better to insert all libs to INCDIRS/LIBDIRS.
 
-  # Unfortunately, some libs are assumed to be only in system dirs.
-  # These will take more effort...
-  # First, we need to prepend their paths to the list of system lib dirs.
-  # As a result, they will be detected (=> enabling some macros and stuff), but not passed to CPP/LD.
+  # sed -i '/^SSL_IPATH=""/s:SSL_IPATH="":SSL_IPATH="'"${OPENSSL_DIR}/include"'":' configure
+  # sed -i '/^SSL_PATH=""/s:SSL_PATH="":SSL_PATH="'"${OPENSSL_DIR}/lib"'":' configure
+  # sed -i '/^CRYPTO_PATH=""/s:CRYPTO_PATH="":CRYPTO_PATH="'"${OPENSSL_DIR}/lib"'":' configure
+  # sed -i '/^SSH_IPATH=""/s:SSH_IPATH="":SSH_IPATH="'"${LIBSSH_DIR}/include"'":' configure
+  # if [ "$(build::get_current_arch_bitness)" = '64' ]; then
+  #   sed -i '/^SSH_PATH=""/s:SSH_PATH="":SSH_PATH="'"${LIBSSH_DIR}/lib64"'":' configure
+  # else
+  #   sed -i '/^SSH_PATH=""/s:SSH_PATH="":SSH_PATH="'"${LIBSSH_DIR}/lib"'":' configure
+  # fi
+  # sed -i '/^IDN_PATH=""/s:IDN_PATH="":IDN_PATH="'"${LIBIDN_DIR}/lib"'":' configure
+  # sed -i '/^IDN_IPATH=""/s:IDN_IPATH="":IDN_IPATH="'"${LIBIDN_DIR}/include"'":' configure
+  # sed -i '/^PCRE_PATH=""/s:PCRE_PATH="":PCRE_PATH="'"${PCRE_DIR}/lib"'":' configure
+  # sed -i '/^PCRE_IPATH=""/s:PCRE_IPATH="":PCRE_IPATH="'"${PCRE_DIR}/include"'":' configure
+  # sed -i '/^CURSES_PATH=""/s:CURSES_PATH="":CURSES_PATH="'"${NCURSES_DIR}/lib"'":' configure
+  # sed -i '/^CURSES_IPATH=""/s:CURSES_IPATH="":CURSES_IPATH="'"${NCURSES_DIR}/include"'":' configure
+
+  # First, prepend lib paths to the list of system lib dirs.
+  # As a result, they will be detected (=> enabling some macros and stuff), but not passed to CPP/LD yet.
   # TODO: deal with multiple insertions if multiple lines like ^INCDIRS=" are present.
   sed -i '/^INCDIRS="/a INCDIRS="$HYDRA_ADDITIONAL_INCLUDE_DIRS $INCDIRS"' configure
   sed -i '/^LIBDIRS="/a LIBDIRS="$HYDRA_ADDITIONAL_LIB_DIRS $LIBDIRS"' configure
 
-  # Second, we need to add them to CPP/LD flags.
+  # Second, add them to CPP/LD flags.
   sed -i '/^if \[ -n "\$CURSES_IPATH" ]; then/i XIPATHS="$HYDRA_ADDITIONAL_CPP_DIRS_OPTS $XIPATHS"' configure
   sed -i '/^if \[ -n "\$CURSES_IPATH" ]; then/i XLIBPATHS="$HYDRA_ADDITIONAL_LD_DIRS_OPTS $XLIBPATHS"' configure
 
-  # Finally, pass those unlucky libraries.
+  # Finally, pass the libraries.
   include_dirs="${ZLIB_DIR}/include "
+  include_dirs+="${OPENSSL_DIR}/include "
+  include_dirs+="${LIBSSH_DIR}/include "
+  include_dirs+="${LIBIDN_DIR}/include "
+  include_dirs+="${PCRE_DIR}/include "
+  include_dirs+="${NCURSES_DIR}/include "
   #include_dirs+="${LIBGPGERROR_DIR}/include "
   #include_dirs+="${LIBGCRYPT_DIR}/include "
 
   lib_dirs="${ZLIB_DIR}/lib "
+  lib_dirs+="${OPENSSL_DIR}/lib "
+  lib_dirs+="${LIBSSH_DIR}/lib "
+  lib_dirs+="${LIBSSH_DIR}/lib64 "
+  lib_dirs+="${LIBIDN_DIR}/lib "
+  lib_dirs+="${PCRE_DIR}/lib "
+  lib_dirs+="${NCURSES_DIR}/lib "
   #lib_dirs+="${LIBGPGERROR_DIR}/lib "
   #lib_dirs+="${LIBGCRYPT_DIR}/lib "
 
-  cpp_opts="-I${ZLIB_DIR}/include "
-  #cpp_opts+="-I${LIBGPGERROR_DIR}/include "
-  #cpp_opts+="-I${LIBGCRYPT_DIR}/include "
+  # Implies that there are no spaces in paths (it's OK, hydra implies the same).
+  cpp_opts=""
+  for include_dir in $include_dirs; do
+    cpp_opts+="-I${include_dir} "
+  done
 
-  ld_opts="-L${ZLIB_DIR}/lib "
-  #ld_opts+="-L${LIBGPGERROR_DIR}/lib "
-  #ld_opts+="-L${LIBGCRYPT_DIR}/lib "
+  ld_opts=""
+  for lib_dir in $lib_dirs; do
+    ld_opts+="-L${lib_dir} "
+  done
 
   CFLAGS="${GCC_OPTS}" \
     CXXFLAGS="${GXX_OPTS}" \
