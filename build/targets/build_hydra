@@ -13,6 +13,10 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/libs/build_libgpg-error.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_libgcrypt.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_ncurses.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_libmemcached.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_postgresql.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_libusb.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_freerdp.sh"
 
 # Hydra requires a lot of hacking in ./configure, every new version should be checked for compatibility very carefully!
 HYDRA_VERSION='9.2'
@@ -58,8 +62,11 @@ build_hydra() (
   sed -i '/^LIBDIRS="/a LIBDIRS="$HYDRA_ADDITIONAL_LIB_DIRS $LIBDIRS"' configure
 
   # Second, add them to CPP/LD flags.
-  sed -i '/^if \[ -n "\$CURSES_IPATH" ]; then/i XIPATHS="$HYDRA_ADDITIONAL_CPP_DIRS_OPTS $XIPATHS"' configure
-  sed -i '/^if \[ -n "\$CURSES_IPATH" ]; then/i XLIBPATHS="$HYDRA_ADDITIONAL_LD_DIRS_OPTS $XLIBPATHS"' configure
+  #sed -i '/^if \[ -n "\$CURSES_IPATH" ]; then/i XIPATHS="$HYDRA_ADDITIONAL_CPP_DIRS_OPTS $XIPATHS"' configure
+  #sed -i '/^if \[ -n "\$CURSES_IPATH" ]; then/i XLIBPATHS="$HYDRA_ADDITIONAL_LD_DIRS_OPTS $XLIBPATHS"' configure
+  sed -i '/^echo "Writing Makefile\.in \.\.\."/i XIPATHS="$HYDRA_ADDITIONAL_CPP_DIRS_OPTS $XIPATHS"' configure
+  sed -i '/^echo "Writing Makefile\.in \.\.\."/i XLIBPATHS="$HYDRA_ADDITIONAL_LD_DIRS_OPTS $XLIBPATHS"' configure
+
 
   # Finally, pass the libraries.
   include_dirs="${ZLIB_DIR}/include "
@@ -68,6 +75,8 @@ build_hydra() (
   include_dirs+="${LIBIDN_DIR}/include "
   include_dirs+="${PCRE_DIR}/include "
   include_dirs+="${NCURSES_DIR}/include "
+  include_dirs+="${LIBMEMCACHED_DIR}/include "
+  include_dirs+="${FREERDP_DIR}/include "
   #include_dirs+="${LIBGPGERROR_DIR}/include "
   #include_dirs+="${LIBGCRYPT_DIR}/include "
 
@@ -77,7 +86,9 @@ build_hydra() (
   lib_dirs+="${LIBSSH_DIR}/lib64 "
   lib_dirs+="${LIBIDN_DIR}/lib "
   lib_dirs+="${PCRE_DIR}/lib "
-  lib_dirs+="${NCURSES_DIR}/lib "
+  lib_dirs+="${LIBMEMCACHED_DIR}/lib "
+  lib_dirs+="${FREERDP_DIR}/lib "
+  lib_dirs+="${FREERDP_DIR}/lib64 "
   #lib_dirs+="${LIBGPGERROR_DIR}/lib "
   #lib_dirs+="${LIBGCRYPT_DIR}/lib "
 
@@ -92,6 +103,12 @@ build_hydra() (
     ld_opts+="-L${lib_dir} "
   done
 
+  # In the final giant cc command for linking -lcrypto and -lssl come BEFORE
+  #   -lfreerdp2 and -lwinpr2 which leads to linking errors.
+  #   To fix them, we need to add -lcrypto and -lssl AFTER -lfreerdp2 and -lwinpr2.
+  sed -i '/^echo "Writing Makefile\.in \.\.\."/i XLIBS="$XLIBS -lcrypto -lssl"' configure
+
+  
   CFLAGS="${GCC_OPTS}" \
     CXXFLAGS="${GXX_OPTS}" \
     HYDRA_ADDITIONAL_INCLUDE_DIRS="${include_dirs}" \
@@ -111,11 +128,10 @@ build_hydra() (
 # TODO: add deps for more features
 # libgtk2.0-dev - for gui (xhydra)
 # libmysqlclient-dev - for mysql (massive, idk if portable)
-# libpq-dev - for postgres
+# Postgres - libpq (hard, not configured for static)
+# Oracle - impossible (closed source, only .so)
+# Firebird - impossible
 # libsvn-dev - SVN
-# firebird-dev - firebird
-# libmemcached-dev - memcached
-# + something for RDP
 main() (
   if [ "$#" -ne 1 ]; then
     echo "Usage: ${0} <arch>"
@@ -134,7 +150,11 @@ main() (
   # build_libgpgerror
   # build_libgcrypt
   build_ncurses
-
+  # linking is successful but memcached is not available
+  # build_libmemcached
+  # build_postgresql
+  build_libusb
+  build_freerdp
   build_hydra
 
   cp "${HYDRA_BUILD_DIR}/hydra" "${OUTPUT_DIRECTORY}/hydra-${HYDRA_VERSION}"
