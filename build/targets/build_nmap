@@ -1,0 +1,71 @@
+#!/bin/bash
+set -e
+set -x
+set -o pipefail
+
+. "${GITHUB_WORKSPACE}/build/common_lib.sh"
+. "${GITHUB_WORKSPACE}/build/build_lib.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_zlib.sh"
+. "${GITHUB_WORKSPACE}/build/libs/build_openssl.sh"
+
+NMAP_VERSION="${NMAP_VERSION:-7.91}"
+NMAP_URL="https://nmap.org/dist/nmap-${NMAP_VERSION}.tar.bz2"
+NMAP_BUILD_DIR="${BUILD_DIRECTORY}/nmap"
+
+
+build_nmap() (
+  curl -sLo 'nmap.tar.bz2' "${NMAP_URL}"
+  common::extract 'nmap.tar.bz2' "${NMAP_BUILD_DIR}"
+  common::safe_cd "${NMAP_BUILD_DIR}"
+
+  # Nmap builds dynamic executables despite "--disable-shared"/"--enable-static".
+  #   Solutions:
+  #   1. LDFLAGS="-static" (happens to work);
+  #   2. Editing Makefiles (see https://github.com/ernw/static-toolbox/blob/bfdc8f494ae8f7b65f011f802fc316f179b6b398/build/targets/build_nmap.sh#L22).
+  # When compiling with "--with-libssh2=included", "configure" fails to find included libz for libssh2.
+  #   Solution: compile libz externally and pass in "--with-libz". Also requires passing dirs in CPPFLAGS and LDFLAGS (bug in "configure"?).
+  CFLAGS="${GCC_OPTS}" \
+    CXXFLAGS="${GXX_OPTS}" \
+    CPPFLAGS="-I${ZLIB_DIR}/include" \
+    LDFLAGS="-L${ZLIB_DIR}/lib -static" \
+    ./configure \
+      --host="$(build::get_host_triplet)" \
+      --disable-dependency-tracking \
+      --disable-shared \
+      --enable-static \
+      --with-openssl="${OPENSSL_DIR}" \
+      --with-libz="${ZLIB_DIR}" \
+      --with-libssh2=included \
+      --with-libpcap=included \
+      --with-libpcre=included \
+      --with-libdnet=included \
+      --with-liblua=included \
+      --with-liblinear=included \
+      --without-ndiff \
+      --without-zenmap
+  make -j"$(nproc)"
+  strip nmap ncat/ncat nping/nping
+)
+
+main() (
+  if [ "$#" -ne 1 ]; then
+    echo "Usage: ${0} <arch>"
+    echo "Example: ${0} x86-64"
+    exit 1
+  fi
+
+  build::init "$1"
+  build_zlib
+  build_openssl
+  build_nmap
+
+  cp "${NMAP_BUILD_DIR}/nmap" "${OUTPUT_DIRECTORY}/nmap-${NMAP_VERSION}"
+  cp "${NMAP_BUILD_DIR}/ncat/ncat" "${OUTPUT_DIRECTORY}/ncat-${NMAP_VERSION}"
+  cp "${NMAP_BUILD_DIR}/nping/nping" "${OUTPUT_DIRECTORY}/nping-${NMAP_VERSION}"
+  echo "[+] Finished building Nmap for ${CURRENT_ARCH}"
+
+  echo ::set-output name=PACKAGED_NAME::"nmap-${TMUX_VERSION}-${CURRENT_ARCH}"
+  echo ::set-output name=PACKAGED_NAME_PATH::"${OUTPUT_DIRECTORY}/*"
+)
+
+main "$@"
