@@ -1,0 +1,2 @@
+image_id="$(docker build . | tail -n 1 | cut -d ' ' -f 3)"
+docker run -it "${image_id}"
