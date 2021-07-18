@@ -164,3 +164,22 @@ build::get_binary_version() (
   fi
   echo "${version}"
 )
+
+
+#######################################
+# Append value to PKG_CONFIG_LIBDIR env var.
+# Globals:
+#   PKG_CONFIG_LIBDIR - rw
+# Arguments:
+#   Path to append
+# Outputs:
+#   None
+#######################################
+build::append_to_pkgconfig_libdir() {
+  path_to_append="${1:?[!] Path is not specified}"
+  if [ -z "${PKG_CONFIG_LIBDIR}" ]; then
+    export PKG_CONFIG_LIBDIR="${path_to_append}"
+  else
+    export PKG_CONFIG_LIBDIR="${PKG_CONFIG_LIBDIR}:${path_to_append}"
+  fi
+}

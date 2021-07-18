@@ -35,35 +35,21 @@ build_hydra() (
   #   Moreover, $PREFIX/{include,lib} comes AFTER system dirs, which almost guarantees cross-compilation fail.
   #   Thus, we will have to edit ./configure manually (and better - file a pull request with custom lib path options).
   #   For some libs there are convenient *LIBNAME*_PATH variables, we can (ab)use them.
+  # Examples:
+  #   sed -i '/^SSL_IPATH=""/s:SSL_IPATH="":SSL_IPATH="'"${OPENSSL_DIR}/include"'":' configure
+  #   sed -i '/^SSL_PATH=""/s:SSL_PATH="":SSL_PATH="'"${OPENSSL_DIR}/lib"'":' configure
+  #   sed -i '/^CRYPTO_PATH=""/s:CRYPTO_PATH="":CRYPTO_PATH="'"${OPENSSL_DIR}/lib"'":' configure
   # NOTE: These hacks are tested and should work, although paths are still appended AFTER system directories.
   # NOTE: If openssl is not found in system paths ($INCDIRS), it is considered outdated by ./configure.
   # Because of these drawbacks, it's better to insert all libs to INCDIRS/LIBDIRS.
 
-  # sed -i '/^SSL_IPATH=""/s:SSL_IPATH="":SSL_IPATH="'"${OPENSSL_DIR}/include"'":' configure
-  # sed -i '/^SSL_PATH=""/s:SSL_PATH="":SSL_PATH="'"${OPENSSL_DIR}/lib"'":' configure
-  # sed -i '/^CRYPTO_PATH=""/s:CRYPTO_PATH="":CRYPTO_PATH="'"${OPENSSL_DIR}/lib"'":' configure
-  # sed -i '/^SSH_IPATH=""/s:SSH_IPATH="":SSH_IPATH="'"${LIBSSH_DIR}/include"'":' configure
-  # if [ "$(build::get_current_arch_bitness)" = '64' ]; then
-  #   sed -i '/^SSH_PATH=""/s:SSH_PATH="":SSH_PATH="'"${LIBSSH_DIR}/lib64"'":' configure
-  # else
-  #   sed -i '/^SSH_PATH=""/s:SSH_PATH="":SSH_PATH="'"${LIBSSH_DIR}/lib"'":' configure
-  # fi
-  # sed -i '/^IDN_PATH=""/s:IDN_PATH="":IDN_PATH="'"${LIBIDN_DIR}/lib"'":' configure
-  # sed -i '/^IDN_IPATH=""/s:IDN_IPATH="":IDN_IPATH="'"${LIBIDN_DIR}/include"'":' configure
-  # sed -i '/^PCRE_PATH=""/s:PCRE_PATH="":PCRE_PATH="'"${PCRE_DIR}/lib"'":' configure
-  # sed -i '/^PCRE_IPATH=""/s:PCRE_IPATH="":PCRE_IPATH="'"${PCRE_DIR}/include"'":' configure
-  # sed -i '/^CURSES_PATH=""/s:CURSES_PATH="":CURSES_PATH="'"${NCURSES_DIR}/lib"'":' configure
-  # sed -i '/^CURSES_IPATH=""/s:CURSES_IPATH="":CURSES_IPATH="'"${NCURSES_DIR}/include"'":' configure
-
   # First, prepend lib paths to the list of system lib dirs.
   # As a result, they will be detected (=> enabling some macros and stuff), but not passed to CPP/LD yet.
-  # TODO: deal with multiple insertions if multiple lines like ^INCDIRS=" are present.
+  # WARNING: will perform multiple insertions if multiple lines like ^INCDIRS=" are present.
   sed -i '/^INCDIRS="/a INCDIRS="$HYDRA_ADDITIONAL_INCLUDE_DIRS $INCDIRS"' configure
   sed -i '/^LIBDIRS="/a LIBDIRS="$HYDRA_ADDITIONAL_LIB_DIRS $LIBDIRS"' configure
 
   # Second, add them to CPP/LD flags.
-  #sed -i '/^if \[ -n "\$CURSES_IPATH" ]; then/i XIPATHS="$HYDRA_ADDITIONAL_CPP_DIRS_OPTS $XIPATHS"' configure
-  #sed -i '/^if \[ -n "\$CURSES_IPATH" ]; then/i XLIBPATHS="$HYDRA_ADDITIONAL_LD_DIRS_OPTS $XLIBPATHS"' configure
   sed -i '/^echo "Writing Makefile\.in \.\.\."/i XIPATHS="$HYDRA_ADDITIONAL_CPP_DIRS_OPTS $XIPATHS"' configure
   sed -i '/^echo "Writing Makefile\.in \.\.\."/i XLIBPATHS="$HYDRA_ADDITIONAL_LD_DIRS_OPTS $XLIBPATHS"' configure
 
@@ -77,8 +63,6 @@ build_hydra() (
   include_dirs+="${NCURSES_DIR}/include "
   include_dirs+="${LIBMEMCACHED_DIR}/include "
   include_dirs+="${FREERDP_DIR}/include "
-  #include_dirs+="${LIBGPGERROR_DIR}/include "
-  #include_dirs+="${LIBGCRYPT_DIR}/include "
 
   lib_dirs="${ZLIB_DIR}/lib "
   lib_dirs+="${OPENSSL_DIR}/lib "
@@ -89,8 +73,6 @@ build_hydra() (
   lib_dirs+="${LIBMEMCACHED_DIR}/lib "
   lib_dirs+="${FREERDP_DIR}/lib "
   lib_dirs+="${FREERDP_DIR}/lib64 "
-  #lib_dirs+="${LIBGPGERROR_DIR}/lib "
-  #lib_dirs+="${LIBGCRYPT_DIR}/lib "
 
   # Implies that there are no spaces in paths (it's OK, hydra implies the same).
   cpp_opts=""
@@ -125,13 +107,17 @@ build_hydra() (
   strip hydra
 )
 
-# TODO: add deps for more features
-# libgtk2.0-dev - for gui (xhydra)
-# libmysqlclient-dev - for mysql (massive, idk if portable)
-# Postgres - libpq (hard, not configured for static)
-# Oracle - impossible (closed source, only .so)
-# Firebird - impossible
-# libsvn-dev - SVN
+# Hydra has a lot of dependencies for extra features.
+# I tried to include every possible dependency, but it is impossible to build/get static versions of some:
+# LIB                 | PURPOSE               | COMMENT
+# --------------------|-----------------------|----------------------------------------------------
+# libgtk2.0           | GUI support (xhydra)  | Haven't tried to add yet.
+# libsvn              | SVN support           | Haven't tried to add yet.
+# libmysqlclient      | MySQL support         | Massive, didn't test for portability.
+# libpq               | PostgreSQL support    | Impossible to add (doesn't support static builds).
+# <can't remember>    | Oracle DB support     | Impossible to add (no static version - closed source, only dynamic libs).
+# <can't remember>    | Firebird support      | Impossible to add.
+# libsmbclient        | SMB support           | Impossible to add (samba does not support static builds).
 main() (
   if [ "$#" -ne 1 ]; then
     echo "Usage: ${0} <arch>"
@@ -146,15 +132,16 @@ main() (
   build_libssh
   build_libidn
   build_pcre
-  # For some reason gcrypt fails to link
-  # build_libgpgerror
-  # build_libgcrypt
+    # For some reason gcrypt fails to link
+    # build_libgpgerror
+    # build_libgcrypt
   build_ncurses
-  # linking is successful but memcached is not available
-  # build_libmemcached
-  # build_postgresql
+    # linking is successful but memcached is not available
+    # build_libmemcached
+    # build_postgresql
   build_libusb
   build_freerdp
+
   build_hydra
 
   cp "${HYDRA_BUILD_DIR}/hydra" "${OUTPUT_DIRECTORY}/hydra-${HYDRA_VERSION}"

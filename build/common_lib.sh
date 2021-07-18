@@ -57,10 +57,11 @@ common::extract() (
       *.tar)      tar xf "$archive" -C "$destination" --strip-components 1   ;;
       *.tbz2)     tar xjf "$archive" -C "$destination" --strip-components 1  ;;
       *.tgz)      tar xzf "$archive" -C "$destination" --strip-components 1  ;;
-      *)          common::print_to_stderr "[!] '${archive}' cannot be extracted with extract()" ;;
+      *)          common::print_to_stderr "[!] '${archive}' cannot be extracted with extract()"; return 1 ;;
     esac
   else
     common::print_to_stderr "[!] '${archive}' is not a valid file"
+    return 1
   fi  
 )
 
