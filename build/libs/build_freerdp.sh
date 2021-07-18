@@ -15,13 +15,14 @@ export FREERDP_DIR="${BUILD_DIRECTORY}/freerdp"
 # Requires:
 # - openssl
 # - zlib
+# NOTE: Currently fails on arm (CMake cannot find pthread.h, although it is present).
 build_freerdp() (
   curl -sLo 'freerdp.tar.gz' "${FREERDP_URL}"
   common::extract 'freerdp.tar.gz' "${FREERDP_SRC_DIR}"
   common::safe_cd "${FREERDP_SRC_DIR}"
 
-  # Compilation fails on linking shared libs until -DBUILD_SHARED_LIBS=OFF is passed.
-  # Will fail on editing RPATH during installation, so -DCMAKE_SKIP_INSTALL_RPATH=ON is required.
+  # -DBUILD_SHARED_LIBS=OFF is required to prevent fail when linking shared libs.
+  # -DCMAKE_SKIP_INSTALL_RPATH=ON is required to prevent fail on editing RPATH during installation.
   # TODO: add missing libraries (that are ignored with WITH_***=OFF).
   CFLAGS="${GCC_OPTS}" \
     CXXFLAGS="${GXX_OPTS}" \
@@ -48,6 +49,7 @@ build_freerdp() (
       -DWITH_SWSCALE=OFF \
       -DWITH_CAIRO=OFF \
       .
+      # -DWITH_SSE2=OFF may be needed
   make -j"$(nproc)"
   make install
 

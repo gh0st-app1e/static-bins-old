@@ -1,4 +1,5 @@
 #!/bin/sh
+# Builds are tested only on x86-64 hosts.
 MUSLCC_URL='https://more.musl.cc/x86_64-linux-musl/'
 MUSLCC_ARCH='x86_64-linux-musl'
 

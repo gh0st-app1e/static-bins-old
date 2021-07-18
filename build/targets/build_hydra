@@ -10,11 +10,11 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/libs/build_libssh.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_libidn.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_pcre.sh"
-. "${GITHUB_WORKSPACE}/build/libs/build_libgpg-error.sh"
-. "${GITHUB_WORKSPACE}/build/libs/build_libgcrypt.sh"
+#. "${GITHUB_WORKSPACE}/build/libs/build_libgpg-error.sh"
+#. "${GITHUB_WORKSPACE}/build/libs/build_libgcrypt.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_ncurses.sh"
-. "${GITHUB_WORKSPACE}/build/libs/build_libmemcached.sh"
-. "${GITHUB_WORKSPACE}/build/libs/build_postgresql.sh"
+#. "${GITHUB_WORKSPACE}/build/libs/build_libmemcached.sh"
+#. "${GITHUB_WORKSPACE}/build/libs/build_postgresql.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_libusb.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_freerdp.sh"
 
@@ -140,7 +140,10 @@ main() (
     # build_libmemcached
     # build_postgresql
   build_libusb
-  build_freerdp
+  # freerdp fails to cross-compile for now.
+  if [ "${CURRENT_ARCH}" == "x86" ] || [ "${CURRENT_ARCH}" == "x86-64" ]; then
+    build_freerdp
+  fi
 
   build_hydra
 
