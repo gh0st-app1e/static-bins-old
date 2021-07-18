@@ -7,7 +7,7 @@ Build framework, repo organization and a few recipes are inspired by https://git
 | Tool | Status | Version | Comments |
 | :--- | :----- | :------ | :------- |
 | [htop](https://github.com/heart-render/static-bins/actions/workflows/build-htop.yml) | ![htop](https://github.com/heart-render/static-bins/actions/workflows/build-htop.yml/badge.svg?branch=master) | 3.0.5 | - |
-| [hydra](https://github.com/heart-render/static-bins/actions/workflows/build-hydra.yml) | ![hydra](https://github.com/heart-render/static-bins/actions/workflows/build-hydra.yml/badge.svg?branch=master) | 9.2 | lacks some features for now (e.g. RDP, MySQL, PostreSQL) |
+| [hydra](https://github.com/heart-render/static-bins/actions/workflows/build-hydra.yml) | ![hydra](https://github.com/heart-render/static-bins/actions/workflows/build-hydra.yml/badge.svg?branch=master) | 9.2 | lacks some features for now; RDP is available only in x86 and x86-64 binaries |
 | [nano](https://github.com/heart-render/static-bins/actions/workflows/build-nano.yml) | ![nano](https://github.com/heart-render/static-bins/actions/workflows/build-nano.yml/badge.svg?branch=master) | 5.6.1 | with libmagic, zlib and utf-8 support |
 | [OpenSSH](https://github.com/heart-render/static-bins/actions/workflows/build-openssh.yml) | ![OpenSSH](https://github.com/heart-render/static-bins/actions/workflows/build-openssh.yml/badge.svg?branch=master) | 8.5p1 | lacks some features for now (e.g. PAM) |
 | [socat](https://github.com/heart-render/static-bins/actions/workflows/build-socat.yml) | ![socat](https://github.com/heart-render/static-bins/actions/workflows/build-socat.yml/badge.svg?branch=master) | 1.7.4.1 | - |
