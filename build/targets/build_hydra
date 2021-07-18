@@ -19,7 +19,7 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/libs/build_freerdp.sh"
 
 # Hydra requires a lot of hacking in ./configure, every new version should be checked for compatibility very carefully!
-HYDRA_VERSION='9.2'
+HYDRA_VERSION='9.0'
 HYDRA_URL="https://github.com/vanhauser-thc/thc-hydra/archive/refs/tags/v${HYDRA_VERSION}.tar.gz"
 HYDRA_BUILD_DIR="${BUILD_DIRECTORY}/hydra"
 
