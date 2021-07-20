@@ -7,34 +7,55 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
 GDB_VERSION="${GDB_VERSION:-10.1}"
-BINUTILS_GDB_GIT="https://sourceware.org/git/binutils-gdb.git"
-BINUTILS_GDB_SRC_DIR="${BUILD_DIRECTORY}/binutils-gdb"
+GDB_URL="ftp://sourceware.org/pub/gdb/releases/gdb-${GDB_VERSION}.tar.xz"
+BINUTILS_URL="ftp://sourceware.org/pub/binutils/releases/binutils-${BINUTILS_VERSION}.tar.xz"
+GDB_SRC_DIR="${BUILD_DIRECTORY}/gdb"
 GDB_BUILD_DIR="${BUILD_DIRECTORY}/gdb-build"
 
 
+# TODO:
+#   configure: WARNING: libipt is missing or unusable; some features may be unavailable.
+#   checking for libdebuginfod >= 0.179... no
+#   configure: WARNING: libdebuginfod is missing or unusable; some features may be unavailable.
+#   configure: WARNING: no enhanced curses library found; disabling TUI
+#   configure: WARNING: expat is missing or unusable; some features may be unavailable.
+#   configure: WARNING: MPFR is missing or unusable; some features may be unavailable.
+#   configure: WARNING: python is missing or unusable; some features may be unavailable.
+#   configure: WARNING: babeltrace is missing or unusable; GDB is unable to read CTF data. (libbabeltrace)
 build_gdb() (
-  git clone "${BINUTILS_GDB_GIT}" "${BINUTILS_GDB_SRC_DIR}"
-  common::safe_cd "${BINUTILS_GDB_SRC_DIR}"
-  git clean -fdx
-  git checkout "gdb-${GDB_VERSION}-release"
+  curl -sLo 'gdb.tar.xz' "${GDB_URL}"
+  common::extract 'gdb.tar.xz' "${GDB_SRC_DIR}"
+  common::safe_cd "${GDB_SRC_DIR}"
   
-  CMD="CFLAGS=\"${GCC_OPTS}\" "
-  CMD+="CXXFLAGS=\"${GXX_OPTS}\" "
-  CMD+="LDFLAGS=\"-static\" "
   if [ "${CURRENT_ARCH}" != "x86-64" ]; then
-    CMD+="CC_FOR_BUILD=\"/x86_64-linux-musl-cross/bin/x86_64-linux-musl-gcc\" "
-    # TODO: should not it be CXX? is it needed at all?
-    CMD+="CPP_FOR_BUILD=\"/x86_64-linux-musl-cross/bin/x86_64-linux-musl-g++\" "
-    # Included libs fail to compile, because they expect host ar to be in PATH named as "(host-triplet)-ar",
+    cc_for_build_value="/x86_64-linux-musl-cross/bin/x86_64-linux-musl-gcc"
+    cxx_for_build_value="/x86_64-linux-musl-cross/bin/x86_64-linux-musl-g++"
+    # Libs bundled with GDB fail to compile because they expect host ar to be in PATH named as "(host-triplet)-ar",
     #   but muslcc containers have cross tools installed as default ones (thus ar is named just as "ar").
     ln -s "/bin/ar" "/bin/$(build::get_host_triplet)-ar"
   fi
-  CMD+="${BINUTILS_GDB_SRC_DIR}/configure --build=x86_64-linux-musl --host=$(build::get_host_triplet) "
-  CMD+="--disable-dependency-tracking --disable-shared --enable-static --disable-nls --enable-gdbserver --disable-inprocess-agent"
 
+  # GDB requires a separate build dir.
   mkdir -p "${GDB_BUILD_DIR}"
   common::safe_cd "${GDB_BUILD_DIR}"
-  eval "$CMD"
+
+  # GDB requires build compiler for cross-compilation.
+  # Originally it was "CPP_FOR_BUILD=..." instead of "CXX_FOR_BUILD=...", fixed it.
+  CFLAGS="${GCC_OPTS}" \
+    CXXFLAGS="${GXX_OPTS}" \
+    LDFLAGS="-static" \
+    CC_FOR_BUILD="${cc_for_build_value}" \
+    CXX_FOR_BUILD="${cxx_for_build_value}" \
+    "${GDB_SRC_DIR}/configure" \
+      --build="x86_64-linux-musl" \
+      --host="$(build::get_host_triplet)" \
+      --disable-dependency-tracking \
+      --disable-shared \
+      --enable-static \
+      --disable-nls \
+      --enable-gdbserver \
+      --disable-inprocess-agent
+
   make -j"$(nproc)"
   strip "${GDB_BUILD_DIR}/gdb/gdb" "${GDB_BUILD_DIR}/gdbserver/gdbserver"
 )
