@@ -9,7 +9,9 @@ set -o pipefail
 NCURSES_VERSION="${NCURSES_VERSION:-6.2}"
 NCURSES_URL="https://ftp.gnu.org/pub/gnu/ncurses/ncurses-${NCURSES_VERSION}.tar.gz"
 NCURSES_BUILD_DIR="${BUILD_DIRECTORY}/ncurses-src"
-export NCURSES_DIR="${BUILD_DIRECTORY}/ncurses"
+#export NCURSES_DIR="${BUILD_DIRECTORY}/ncurses"
+# temporary compat fix for the old build system
+export NCURSES_DIR="/$(cc -dumpmachine)/usr"
 
 
 # NOTE: ncurses require second compiler for the build machine arch when cross-compiling

@@ -49,7 +49,7 @@ build_freerdp() (
       -DWITH_SWSCALE=OFF \
       -DWITH_CAIRO=OFF \
       .
-      # -DWITH_SSE2=OFF may be needed
+      # -DWITH_SSE2=OFF is needed for arm if not auto guessed
   make -j"$(nproc)"
   make install
 

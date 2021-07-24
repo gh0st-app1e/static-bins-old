@@ -8,7 +8,9 @@ build_zlib() {
   local zlib_version='1.2.11'
   local zlib_url="https://zlib.net/zlib-${zlib_version}.tar.gz"
   local zlib_build_dir="${BUILD_DIRECTORY}/zlib-src"
-  export ZLIB_DIR="${BUILD_DIRECTORY}/zlib"
+  #export ZLIB_DIR="${BUILD_DIRECTORY}/zlib"
+  # temporary compat fix for the old build system
+  export ZLIB_DIR="/$(cc -dumpmachine)/usr"
 
   curl -sLo 'zlib.tar.gz' "${zlib_url}"
   common::extract 'zlib.tar.gz' "${zlib_build_dir}"

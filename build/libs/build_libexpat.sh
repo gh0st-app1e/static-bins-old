@@ -7,7 +7,9 @@ build_libexpat() {
   local libexpat_version='2.3.0'
   local libexpat_url="https://github.com/libexpat/libexpat/releases/download/R_2_3_0/expat-2.3.0.tar.gz"
   local libexpat_build_dir="${BUILD_DIRECTORY}/libexpat-src"
-  export LIBEXPAT_DIR="${BUILD_DIRECTORY}/libexpat"
+  #export LIBEXPAT_DIR="${BUILD_DIRECTORY}/libexpat"
+  # temporary compat fix for the old build system
+  export LIBEXPAT_DIR="/$(cc -dumpmachine)/usr"
 
   curl -sLo 'libexpat.tar.gz' "${libexpat_url}"
   common::extract 'libexpat.tar.gz' "${libexpat_build_dir}"

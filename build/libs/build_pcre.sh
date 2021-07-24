@@ -9,8 +9,9 @@ set -o pipefail
 PCRE_VERSION=${PCRE_VERSION:-8.44}
 PCRE_URL="https://ftp.pcre.org/pub/pcre/pcre-${PCRE_VERSION}.tar.gz"
 PCRE_BUILD_DIR="${BUILD_DIRECTORY}/pcre-src"
-export PCRE_DIR="${BUILD_DIRECTORY}/pcre"
-
+#export PCRE_DIR="${BUILD_DIRECTORY}/pcre"
+# temporary compat fix for the old build system
+export PCRE_DIR="/$(cc -dumpmachine)/usr"
 
 # The old PCRE library, not PCRE2!
 build_pcre() (

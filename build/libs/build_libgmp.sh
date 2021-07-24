@@ -7,21 +7,33 @@ build_libgmp() {
   local libgmp_version=${LIBGMP_VERSION:-6.2.1}
   local libgmp_url="https://gmplib.org/download/gmp/gmp-${libgmp_version}.tar.xz"
   local libgmp_build_dir="${BUILD_DIRECTORY}/libgmp-src"
-  export LIBGMP_DIR="${BUILD_DIRECTORY}/libgmp"
+  # temporary compat fix for the old build system
+  export LIBGMP_DIR="/$(cc -dumpmachine)/usr"
 
   curl -sLo 'libgmp.tar.xz' "${libgmp_url}"
   common::extract 'libgmp.tar.xz' "${libgmp_build_dir}"
   common::safe_cd "${libgmp_build_dir}"
 
+  if [ "${CURRENT_ARCH}" != "x86-64" ]; then
+    cc_for_build_value="/x86_64-linux-musl-cross/bin/x86_64-linux-musl-gcc"
+  fi
+
+  # Build options manual: https://gmplib.org/manual/Build-Options
+  # NOTE: it is possible to pass CPU type for archs which support this option to use faster assembly instead of C code.
+  #   x86 is already covered by '--enable-fat'.
   CFLAGS="${GCC_OPTS}" \
     CXXFLAGS="${GXX_OPTS}" \
+    CC_FOR_BUILD="${cc_for_build_value}" \
     ./configure \
       --host="$(build::get_host_triplet)" \
       --prefix="${LIBGMP_DIR}" \
       --disable-shared \
-      --enable-static
+      --enable-static \
+      --enable-fat \
+      --enable-cxx
   make -j"$(nproc)"
-  #make check
+  # Tests will fail during cross-compilation.
+  # make check
   make install
   build::append_to_pkgconfig_libdir "${LIBGMP_DIR}/lib/pkgconfig"
 
