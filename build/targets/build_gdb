@@ -92,6 +92,9 @@ main() (
     exit 1
   fi
 
+  # TEST!
+  export PKG_CONFIG_PATH="/x86_64-linux-musl/usr/lib/pkgconfig"
+
   build::init "$1"
   # build_libgmp
   # build_libmpfr

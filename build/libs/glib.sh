@@ -51,14 +51,18 @@ build_glib() (
   meson \
     --buildtype=release \
     --prefix="${GLIB_DIR}" \
-    -Dc_args="$(echo ${GCC_OPTS} | tr -s ' ' | tr ' ' ',')" \
-    -Dcpp_args="$(echo ${GXX_OPTS} | tr -s ' ' | tr ' ' ',')" \
+    -Dc_args="${GCC_OPTS}" \
+    -Dcpp_args="${GXX_OPTS}" \
     -Ddefault_library=static \
     -Dnls=disabled \
     -Dselinux=disabled \
     ..
   ninja
   ninja install
+
+  # these were incorrect options (didn't understand meson docs on c_args?)
+  #-Dc_args="$(echo ${GCC_OPTS} | tr -s ' ' | tr ' ' ',')" \
+  #-Dcpp_args="$(echo ${GXX_OPTS} | tr -s ' ' | tr ' ' ',')" \
 
   echo "[+] Finished building glib for ${CURRENT_ARCH}"
 )
