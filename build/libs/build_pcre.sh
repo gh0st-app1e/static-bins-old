@@ -26,9 +26,12 @@ build_pcre() (
       --disable-dependency-tracking \
       --prefix="${PCRE_DIR}" \
       --disable-shared \
+      --enable-static \
       --enable-utf \
+      --enable-unicode-properties \
       --enable-pcre16 \
-      --enable-pcre32
+      --enable-pcre32 \
+      --enable-jit
   make -j"$(nproc)"
   make install
 

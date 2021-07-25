@@ -17,6 +17,8 @@ export BABELTRACE_DIR="/$(cc -dumpmachine)/usr"
 # Requires:
 # - glib 2.28+
 # - libpopt
+# - libuuid (uuid may be built in libc, but it seems that it is missing from musl)
+# NOTE: babeltrace has some problems with static linking (e.g. https://bugs.lttng.org/issues/1055, more in the code below).
 build_babeltrace() (
   curl -sLo 'babeltrace.tar.bz2' "${BABELTRACE_URL}"
   common::extract 'babeltrace.tar.bz2' "${BABELTRACE_BUILD_DIR}"
@@ -31,9 +33,13 @@ build_babeltrace() (
       --prefix="${BABELTRACE_DIR}" \
       --disable-shared \
       --enable-static \
+      --disable-maintainer-mode \
       --disable-debug-info
   make -j"$(nproc)"
   make install
+
+  # PROBLEM (solved): Babeltrace does not add glib dependency to pkg-config file => fails to link with users.
+
 
   echo "[+] Finished building babeltrace for ${CURRENT_ARCH}"
 )

@@ -7,10 +7,10 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
 # Only the latest version is available as a release.
-GLIB_VERSION_MAJOR="${GLIB_VERSION_MAJOR:-2.68}"
-GLIB_VERSION_MINOR="${GLIB_VERSION_MINOR:-3}"
-GLIB_VERSION="${GLIB_VERSION_MAJOR}.${GLIB_VERSION_MINOR}"
-GLIB_URL="https://download.gnome.org/sources/glib/${GLIB_VERSION_MAJOR}/glib-${GLIB_VERSION}.tar.xz"
+GLIB_VERSION_MAJOR_MINOR="${GLIB_VERSION_MAJOR_MINOR:-2.68}"
+GLIB_VERSION_MAINTENANCE="${GLIB_VERSION_MAINTENANCE:-3}"
+GLIB_VERSION="${GLIB_VERSION_MAJOR_MINOR}.${GLIB_VERSION_MAINTENANCE}"
+GLIB_URL="https://download.gnome.org/sources/glib/${GLIB_VERSION_MAJOR_MINOR}/glib-${GLIB_VERSION}.tar.xz"
 GLIB_SRC_DIR="${BUILD_DIRECTORY}/glib-build"
 GLIB_BUILD_DIR="${BUILD_DIRECTORY}/glib-build/build"
 # temporary compat fix for the old build system
