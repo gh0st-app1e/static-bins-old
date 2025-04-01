@@ -1,20 +1,19 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
-LIBPCAP_VERSION="${LIBPCAP_VERSION:-1.10.0}"
-LIBPCAP_URL="https://www.tcpdump.org/release/libpcap-${LIBPCAP_VERSION}.tar.gz"
+LIBPCAP_VERSION="${LIBPCAP_VERSION:-1.10.5}"
+LIBPCAP_ARCHIVE="libpcap-${LIBPCAP_VERSION}.tar.gz"
+LIBPCAP_URL="https://www.tcpdump.org/release/${LIBPCAP_ARCHIVE}"
 LIBPCAP_BUILD_DIR="${BUILD_DIRECTORY}/libpcap-src"
 export LIBPCAP_DIR="${BUILD_DIRECTORY}/libpcap"
 
 
 build_libpcap() (
-  curl -sLo 'libpcap.tar.gz' "${LIBPCAP_URL}"
-  common::extract 'libpcap.tar.gz' "${LIBPCAP_BUILD_DIR}"
+  curl -sLo "${LIBPCAP_ARCHIVE}" "${LIBPCAP_URL}"
+  common::extract "${LIBPCAP_ARCHIVE}" "${LIBPCAP_BUILD_DIR}"
   common::safe_cd "${LIBPCAP_BUILD_DIR}"
 
   # Does not support --disable-dependency-tracking 

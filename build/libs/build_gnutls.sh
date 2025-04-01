@@ -12,13 +12,14 @@
 # - libidn2 for Internationalized Domain Names support
 # - libunbound for DNSSEC/DANE functionality
 build_gnutls() {
-  local gnutls_version=${GNUTLS_VERSION:-3.6.15}
-  local gnutls_url="https://www.gnupg.org/ftp/gcrypt/gnutls/v${gnutls_version%.*}/gnutls-${gnutls_version}.tar.xz"
+  local gnutls_version=${GNUTLS_VERSION:-3.8.9}
+  local gnutls_archive="gnutls-${gnutls_version}.tar.xz"
+  local gnutls_url="https://www.gnupg.org/ftp/gcrypt/gnutls/v${gnutls_version%.*}/${gnutls_archive}"
   local gnutls_build_dir="${BUILD_DIRECTORY}/gnutls-src"
   export GNUTLS_DIR="${BUILD_DIRECTORY}/gnutls"
 
-  curl -sLo 'gnutls.tar.xz' "${gnutls_url}"
-  common::extract 'gnutls.tar.xz' "${gnutls_build_dir}"
+  curl -sLo "${gnutls_archive}" "${gnutls_url}"
+  common::extract "${gnutls_archive}" "${gnutls_build_dir}"
   common::safe_cd "${gnutls_build_dir}"
 
   # For some reason pkg-config cannot find gmp even when pointed to its .pc file with PKG_CONFIG_LIBDIR.

@@ -1,21 +1,20 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_zlib.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_openssl.sh"
 
-NMAP_VERSION="${NMAP_VERSION:-7.91}"
-NMAP_URL="https://nmap.org/dist/nmap-${NMAP_VERSION}.tar.bz2"
+NMAP_VERSION="${NMAP_VERSION:-7.95}"
+NMAP_ARCHIVE="nmap-${NMAP_VERSION}.tar.bz2"
+NMAP_URL="https://nmap.org/dist/${NMAP_ARCHIVE}"
 NMAP_BUILD_DIR="${BUILD_DIRECTORY}/nmap"
 
 
 build_nmap() (
-  curl -sLo 'nmap.tar.bz2' "${NMAP_URL}"
-  common::extract 'nmap.tar.bz2' "${NMAP_BUILD_DIR}"
+  curl -sLo "${NMAP_ARCHIVE}" "${NMAP_URL}"
+  common::extract "${NMAP_ARCHIVE}" "${NMAP_BUILD_DIR}"
   common::safe_cd "${NMAP_BUILD_DIR}"
 
   # Nmap builds dynamic executables despite "--disable-shared"/"--enable-static".

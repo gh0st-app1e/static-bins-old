@@ -6,13 +6,14 @@
 # Requires:
 # - libexpat
 build_dbus() {
-  local dbus_version=${DBUS_VERSION:-1.13.18}
-  local dbus_url="https://dbus.freedesktop.org/releases/dbus/dbus-${dbus_version}.tar.xz"
+  local dbus_version=${DBUS_VERSION:-1.16.2}
+  local dbus_archive="dbus-${dbus_version}.tar.xz"
+  local dbus_url="https://dbus.freedesktop.org/releases/dbus/${dbus_archive}"
   local dbus_build_dir="${BUILD_DIRECTORY}/dbus-src"
   export DBUS_DIR="${BUILD_DIRECTORY}/dbus"
 
-  curl -sLo 'dbus.tar.xz' "${dbus_url}"
-  common::extract 'dbus.tar.xz' "${dbus_build_dir}"
+  curl -sLo "${dbus_archive}" "${dbus_url}"
+  common::extract "${dbus_archive}" "${dbus_build_dir}"
   common::safe_cd "${dbus_build_dir}"
 
   # NOTE: dbus has many optional --with-* options. 

@@ -4,14 +4,15 @@
 
 
 build_libgmp() {
-  local libgmp_version=${LIBGMP_VERSION:-6.2.1}
-  local libgmp_url="https://gmplib.org/download/gmp/gmp-${libgmp_version}.tar.xz"
+  local libgmp_version=${LIBGMP_VERSION:-6.3.0}
+  local libgmp_archive="gmp-${libgmp_version}.tar.xz"
+  local libgmp_url="https://gmplib.org/download/gmp/${libgmp_archive}"
   local libgmp_build_dir="${BUILD_DIRECTORY}/libgmp-src"
   # temporary compat fix for the old build system
   export LIBGMP_DIR="/$(cc -dumpmachine)/usr"
 
-  curl -sLo 'libgmp.tar.xz' "${libgmp_url}"
-  common::extract 'libgmp.tar.xz' "${libgmp_build_dir}"
+  curl -sLo "${libgmp_archive}" "${libgmp_url}"
+  common::extract "${libgmp_archive}" "${libgmp_build_dir}"
   common::safe_cd "${libgmp_build_dir}"
 
   if [ "${CURRENT_ARCH}" != "x86-64" ]; then

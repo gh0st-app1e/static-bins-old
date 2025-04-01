@@ -6,14 +6,15 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
-STRACE_VERSION="${STRACE_VERSION:-5.11}"
-STRACE_URL="https://strace.io/files/${STRACE_VERSION}/strace-${STRACE_VERSION}.tar.xz"
+STRACE_VERSION="${STRACE_VERSION:-6.9}"
+STRACE_ARCHIVE="strace-${STRACE_VERSION}.tar.xz"
+STRACE_URL="https://strace.io/files/${STRACE_VERSION}/${STRACE_ARCHIVE}"
 STRACE_BUILD_DIR="${BUILD_DIRECTORY}/strace"
 
 
 build_strace() (
-  curl -sLo 'strace.tar.xz' "${STRACE_URL}"
-  common::extract 'strace.tar.xz' "${STRACE_BUILD_DIR}"
+  curl -sLo "${STRACE_ARCHIVE}" "${STRACE_URL}"
+  common::extract "${STRACE_ARCHIVE}" "${STRACE_BUILD_DIR}"
   common::safe_cd "${STRACE_BUILD_DIR}"
 
   CMD="CFLAGS=\"${GCC_OPTS}\" "

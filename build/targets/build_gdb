@@ -1,7 +1,5 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
@@ -29,7 +27,8 @@ set -o pipefail
 
 . "${GITHUB_WORKSPACE}/build/libs/xzutils.sh"
 
-GDB_VERSION="${GDB_VERSION:-10.2}"
+GDB_VERSION="${GDB_VERSION:-16.2}"
+GDB_ARCHIVE="gdb-${GDB_VERSION}.tar.xz"
 #GDB_URL="ftp://sourceware.org/pub/gdb/releases/gdb-${GDB_VERSION}.tar.xz"
 GDB_URL="https://ftp.gnu.org/gnu/gdb/gdb-${GDB_VERSION}.tar.xz"
 GDB_SRC_DIR="${BUILD_DIRECTORY}/gdb"
@@ -43,8 +42,8 @@ GDB_BUILD_DIR="${BUILD_DIRECTORY}/gdb-build"
 #   configure: WARNING: babeltrace is missing or unusable; GDB is unable to read CTF data. (libbabeltrace)
 # NOTE: GDB can use libxxhash and liblzma if they are present.
 build_gdb() (
-  curl -sLo 'gdb.tar.xz' "${GDB_URL}"
-  common::extract 'gdb.tar.xz' "${GDB_SRC_DIR}" > /dev/null
+  curl -sLo "${GDB_ARCHIVE}" "${GDB_URL}"
+  common::extract "${GDB_ARCHIVE}" "${GDB_SRC_DIR}" > /dev/null
   common::safe_cd "${GDB_SRC_DIR}"
   
   if [ "${CURRENT_ARCH}" != "x86-64" ]; then

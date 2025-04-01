@@ -1,7 +1,5 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"

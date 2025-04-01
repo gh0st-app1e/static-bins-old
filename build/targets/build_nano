@@ -1,7 +1,5 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
@@ -9,14 +7,15 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/libs/build_libmagic.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_zlib.sh"
 
-NANO_VERSION="${NANO_VERSION:-5.6.1}"
-NANO_URL="https://www.nano-editor.org/dist/v${NANO_VERSION%%.*}/nano-${NANO_VERSION}.tar.gz"
+NANO_VERSION="${NANO_VERSION:-8.3}"
+NANO_ARCHIVE="nano-${NANO_VERSION}.tar.xz"
+NANO_URL="https://www.nano-editor.org/dist/v${NANO_VERSION%%.*}/${NANO_ARCHIVE}"
 NANO_BUILD_DIR="${BUILD_DIRECTORY}/nano"
 
 
 build_nano() (
-  curl -sLo 'nano.tar.gz' "${NANO_URL}"
-  common::extract 'nano.tar.gz' "${NANO_BUILD_DIR}"
+  curl -sLo "${NANO_ARCHIVE}" "${NANO_URL}"
+  common::extract "${NANO_ARCHIVE}" "${NANO_BUILD_DIR}"
   common::safe_cd "${NANO_BUILD_DIR}"
 
   CFLAGS="${GCC_OPTS}" \

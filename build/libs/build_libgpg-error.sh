@@ -1,13 +1,12 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
-LIBGPGERROR_VERSION=${LIBGPGERROR_VERSION:-1.42}
-LIBGPGERROR_URL="https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-${LIBGPGERROR_VERSION}.tar.bz2"
+LIBGPGERROR_VERSION=${LIBGPGERROR_VERSION:-1.51}
+LIBGPGERROR_ARCHIVE="libgpg-error-${LIBGPGERROR_VERSION}.tar.bz2"
+LIBGPGERROR_URL="https://gnupg.org/ftp/gcrypt/libgpg-error/${LIBGPGERROR_ARCHIVE}"
 LIBGPGERROR_BUILD_DIR="${BUILD_DIRECTORY}/libgpg-error-src"
 export LIBGPGERROR_DIR="${BUILD_DIRECTORY}/libgpg-error"
 
@@ -16,8 +15,8 @@ export LIBGPGERROR_DIR="${BUILD_DIRECTORY}/libgpg-error"
 #   --with-libintl-prefix[=DIR]  search for libintl in DIR/include and DIR/lib
 #   --with-readline=DIR
 build_libgpgerror() (
-  curl -sLo 'libgpg-error.tar.bz2' "${LIBGPGERROR_URL}"
-  common::extract 'libgpg-error.tar.bz2' "${LIBGPGERROR_BUILD_DIR}"
+  curl -sLo "${LIBGPGERROR_ARCHIVE}" "${LIBGPGERROR_URL}"
+  common::extract "${LIBGPGERROR_ARCHIVE}" "${LIBGPGERROR_BUILD_DIR}"
   common::safe_cd "${LIBGPGERROR_BUILD_DIR}"
 
   CFLAGS="${GCC_OPTS}" \

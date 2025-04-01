@@ -1,20 +1,19 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
-LIBIDN_VERSION=${LIBIDN_VERSION:-1.36}
-LIBIDN_URL="https://ftp.gnu.org/gnu/libidn/libidn-${LIBIDN_VERSION}.tar.gz"
+LIBIDN_VERSION=${LIBIDN_VERSION:-1.43}
+LIBIDN_ARCHIVE="libidn-${LIBIDN_VERSION}.tar.gz"
+LIBIDN_URL="https://ftp.gnu.org/gnu/libidn/${LIBIDN_ARCHIVE}"
 LIBIDN_BUILD_DIR="${BUILD_DIRECTORY}/libidn-src"
 export LIBIDN_DIR="${BUILD_DIRECTORY}/libidn"
 
 
 build_libidn() (
-  curl -sLo 'libidn.tar.gz' "${LIBIDN_URL}"
-  common::extract 'libidn.tar.gz' "${LIBIDN_BUILD_DIR}"
+  curl -sLo "${LIBIDN_ARCHIVE}" "${LIBIDN_URL}"
+  common::extract "${LIBIDN_ARCHIVE}" "${LIBIDN_BUILD_DIR}"
   common::safe_cd "${LIBIDN_BUILD_DIR}"
 
 # TODO:

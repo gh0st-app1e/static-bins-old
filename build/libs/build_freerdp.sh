@@ -1,13 +1,12 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
-FREERDP_VERSION=${FREERDP_VERSION:-2.3.2}
-FREERDP_URL="https://pub.freerdp.com/releases/freerdp-${FREERDP_VERSION}.tar.gz"
+FREERDP_VERSION=${FREERDP_VERSION:-3.9.0}
+FREERDP_ARCHIVE="freerdp-${FREERDP_VERSION}.tar.xz"
+FREERDP_URL="https://pub.freerdp.com/releases/${FREERDP_ARCHIVE}"
 FREERDP_SRC_DIR="${BUILD_DIRECTORY}/freerdp-src"
 export FREERDP_DIR="${BUILD_DIRECTORY}/freerdp"
 
@@ -17,8 +16,8 @@ export FREERDP_DIR="${BUILD_DIRECTORY}/freerdp"
 # - zlib
 # NOTE: Currently fails on arm (CMake cannot find pthread.h, although it is present).
 build_freerdp() (
-  curl -sLo 'freerdp.tar.gz' "${FREERDP_URL}"
-  common::extract 'freerdp.tar.gz' "${FREERDP_SRC_DIR}"
+  curl -sLo "${FREERDP_ARCHIVE}" "${FREERDP_URL}"
+  common::extract "${FREERDP_ARCHIVE}" "${FREERDP_SRC_DIR}"
   common::safe_cd "${FREERDP_SRC_DIR}"
 
   # -DBUILD_SHARED_LIBS=OFF is required to prevent fail when linking shared libs.

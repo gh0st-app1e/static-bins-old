@@ -1,16 +1,13 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
 # Only the latest version is available as a release.
-GLIB_VERSION_MAJOR_MINOR="${GLIB_VERSION_MAJOR_MINOR:-2.68}"
-GLIB_VERSION_MAINTENANCE="${GLIB_VERSION_MAINTENANCE:-3}"
-GLIB_VERSION="${GLIB_VERSION_MAJOR_MINOR}.${GLIB_VERSION_MAINTENANCE}"
-GLIB_URL="https://download.gnome.org/sources/glib/${GLIB_VERSION_MAJOR_MINOR}/glib-${GLIB_VERSION}.tar.xz"
+GLIB_VERSION="${GLIB_VERSION:-2.9.6}"
+GLIB_ARCHIVE="glib-${GLIB_VERSION}.tar.bz2"
+GLIB_URL="https://download.gnome.org/sources/glib/${GLIB_VERSION%.*}/${GLIB_ARCHIVE}"
 GLIB_SRC_DIR="${BUILD_DIRECTORY}/glib-build"
 GLIB_BUILD_DIR="${BUILD_DIRECTORY}/glib-build/build"
 # temporary compat fix for the old build system
@@ -25,8 +22,8 @@ export GLIB_DIR="/$(cc -dumpmachine)/usr"
 # - libelf
 # NOTE: Glib itself supports static build, but most of other GTK stack does not.
 build_glib() (
-  curl -sLo 'glib.tar.xz' "${GLIB_URL}"
-  common::extract 'glib.tar.xz' "${GLIB_SRC_DIR}"
+  curl -sLo "${GLIB_ARCHIVE}" "${GLIB_URL}"
+  common::extract "${GLIB_ARCHIVE}" "${GLIB_SRC_DIR}"
   common::safe_cd "${GLIB_SRC_DIR}"
 
   # A patch is recommended by LFS to reduce warnings:

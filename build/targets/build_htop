@@ -1,20 +1,19 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_ncurses.sh"
 
-HTOP_VERSION="${HTOP_VERSION:-3.0.5}"
-HTOP_URL="https://github.com/htop-dev/htop/archive/refs/tags/${HTOP_VERSION}.tar.gz"
+HTOP_VERSION="${HTOP_VERSION:-3.4.0}"
+HTOP_ARCHIVE="${HTOP_VERSION}.tar.gz"
+HTOP_URL="https://github.com/htop-dev/htop/archive/refs/tags/${HTOP_ARCHIVE}"
 HTOP_BUILD_DIR="${BUILD_DIRECTORY}/htop"
 
 
 build_htop() (
-  curl -sLo 'htop.tar.gz' "${HTOP_URL}"
-  common::extract 'htop.tar.gz' "${HTOP_BUILD_DIR}"
+  curl -sLo "${HTOP_ARCHIVE}" "${HTOP_URL}"
+  common::extract "${HTOP_ARCHIVE}" "${HTOP_BUILD_DIR}"
   common::safe_cd "${HTOP_BUILD_DIR}"
   ./autogen.sh
   CFLAGS="${GCC_OPTS}" \

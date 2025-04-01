@@ -1,21 +1,20 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_openssl.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_zlib.sh"
 
-OPENSSH_VERSION="${OPENSSH_VERSION:-8.5p1}"
-OPENSSH_URL="https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${OPENSSH_VERSION}.tar.gz"
+OPENSSH_VERSION="${OPENSSH_VERSION:-9.9p2}"
+OPENSSH_ARCHIVE="openssh-${OPENSSH_VERSION}.tar.gz"
+OPENSSH_URL="https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/${OPENSSH_ARCHIVE}"
 OPENSSH_BUILD_DIR="${BUILD_DIRECTORY}/openssh-portable"
 
 
 build_openssh() (
-  curl -sLo 'openssh.tar.gz' "${OPENSSH_URL}"
-  common::extract 'openssh.tar.gz' "${OPENSSH_BUILD_DIR}"
+  curl -sLo "${OPENSSH_ARCHIVE}" "${OPENSSH_URL}"
+  common::extract "${OPENSSH_ARCHIVE}" "${OPENSSH_BUILD_DIR}"
   common::safe_cd "${OPENSSH_BUILD_DIR}"
 
   CFLAGS="${GCC_OPTS}" \

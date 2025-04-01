@@ -1,13 +1,12 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
-LIBSSH_VERSION=${LIBSSH_VERSION:-0.9.5}
-LIBSSH_URL="https://www.libssh.org/files/${LIBSSH_VERSION%.*}/libssh-${LIBSSH_VERSION}.tar.xz"
+LIBSSH_VERSION=${LIBSSH_VERSION:-0.11.1}
+LIBSSH_ARCHIVE="libssh-${LIBSSH_VERSION}.tar.xz"
+LIBSSH_URL="https://www.libssh.org/files/${LIBSSH_VERSION%.*}/${LIBSSH_ARCHIVE}"
 LIBSSH_SRC_DIR="${BUILD_DIRECTORY}/libssh-src"
 LIBSSH_BUILD_DIR="${BUILD_DIRECTORY}/libssh-build"
 export LIBSSH_DIR="${BUILD_DIRECTORY}/libssh"
@@ -18,8 +17,8 @@ export LIBSSH_DIR="${BUILD_DIRECTORY}/libssh"
 # - zlib
 # May install lib in ${BUILD_DIRECTORY}/lib64! 
 build_libssh() (
-  curl -sLo 'libssh.tar.xz' "${LIBSSH_URL}"
-  common::extract 'libssh.tar.xz' "${LIBSSH_SRC_DIR}"
+  curl -sLo "${LIBSSH_ARCHIVE}" "${LIBSSH_URL}"
+  common::extract "${LIBSSH_ARCHIVE}" "${LIBSSH_SRC_DIR}"
   mkdir -p "${LIBSSH_BUILD_DIR}"
   common::safe_cd "${LIBSSH_BUILD_DIR}"
 

@@ -1,21 +1,20 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
-XZUTILS_VERSION="${XZUTILS_VERSION:-5.2.5}"
-XZUTILS_URL="https://sourceforge.net/projects/lzmautils/files/xz-${XZUTILS_VERSION}.tar.xz/download"
+XZUTILS_VERSION="${XZUTILS_VERSION:-5.8.0}"
+XZUTILS_ARCHIVE="xz-${XZUTILS_VERSION}.tar.xz"
+XZUTILS_URL="https://sourceforge.net/projects/lzmautils/files/${XZUTILS_ARCHIVE}/download"
 XZUTILS_BUILD_DIR="${BUILD_DIRECTORY}/xzutils-build"
 # temporary compat fix for the old build system
 export XZUTILS_DIR="/$(cc -dumpmachine)/usr"
 
 
 build_liblzma() (
-  curl -sLo 'xzutils.tar.xz' "${XZUTILS_URL}"
-  common::extract 'xzutils.tar.xz' "${XZUTILS_BUILD_DIR}"
+  curl -sLo "${XZUTILS_ARCHIVE}" "${XZUTILS_URL}"
+  common::extract "${XZUTILS_ARCHIVE}" "${XZUTILS_BUILD_DIR}"
   common::safe_cd "${XZUTILS_BUILD_DIR}"
 
   CFLAGS="${GCC_OPTS}" \

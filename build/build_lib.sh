@@ -133,7 +133,7 @@ build::get_lib_arch() (
 #######################################
 build::get_binary_version() (
   cmd="$1"
-  if [ -z "${cmd}" ]; then
+  if [ -z "${cmd:-}" ]; then
     error_text="[!] Please provide a command to determine the version"
     error_text="${error_text}\nExample: /build/test --version | awk '{print \$2}'"
     common::print_to_stderr "${error_text}"
@@ -177,7 +177,7 @@ build::get_binary_version() (
 #######################################
 build::append_to_pkgconfig_libdir() {
   path_to_append="${1:?[!] Path is not specified}"
-  if [ -z "${PKG_CONFIG_LIBDIR}" ]; then
+  if [ -z "${PKG_CONFIG_LIBDIR:-}" ]; then
     export PKG_CONFIG_LIBDIR="${path_to_append}"
   else
     export PKG_CONFIG_LIBDIR="${PKG_CONFIG_LIBDIR}:${path_to_append}"

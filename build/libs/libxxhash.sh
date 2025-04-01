@@ -1,13 +1,12 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
-LIBXXHASH_VERSION="0.8.0"
-LIBXXHASH_URL="https://github.com/Cyan4973/xxHash/archive/refs/tags/v${LIBXXHASH_VERSION}.tar.gz"
+LIBXXHASH_VERSION="0.8.3"
+LIBXXHASH_ARCHIVE="v${LIBXXHASH_VERSION}.tar.gz"
+LIBXXHASH_URL="https://github.com/Cyan4973/xxHash/archive/refs/tags/${LIBXXHASH_ARCHIVE}"
 LIBXXHASH_BUILD_DIR="${BUILD_DIRECTORY}/libxxhash-build"
 # temporary compat fix for the old build system
 export LIBXXHASH_DIR="/$(cc -dumpmachine)/usr"
@@ -16,8 +15,8 @@ export LIBXXHASH_DIR="/$(cc -dumpmachine)/usr"
 # TODO: make check can be run with cross-compiled binaries on emulated environments (qemu user mode)
 #   by setting $(RUN_ENV) to the target emulation environment
 build_libxxhash() (
-  curl -sLo 'libxxhash.tar.gz' "${LIBXXHASH_URL}"
-  common::extract 'libxxhash.tar.gz' "${LIBXXHASH_BUILD_DIR}"
+  curl -sLo "${LIBXXHASH_ARCHIVE}" "${LIBXXHASH_URL}"
+  common::extract "${LIBXXHASH_ARCHIVE}" "${LIBXXHASH_BUILD_DIR}"
   common::safe_cd "${LIBXXHASH_BUILD_DIR}"
 
   # TODO: make prefix a global shell var.

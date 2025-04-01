@@ -1,13 +1,12 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
 
-NCURSES_VERSION="${NCURSES_VERSION:-6.2}"
-NCURSES_URL="https://ftp.gnu.org/pub/gnu/ncurses/ncurses-${NCURSES_VERSION}.tar.gz"
+NCURSES_VERSION="${NCURSES_VERSION:-6.5}"
+NCURSES_ARCHIVE="ncurses-${NCURSES_VERSION}.tar.gz"
+NCURSES_URL="https://ftp.gnu.org/pub/gnu/ncurses/${NCURSES_ARCHIVE}"
 NCURSES_BUILD_DIR="${BUILD_DIRECTORY}/ncurses-src"
 #export NCURSES_DIR="${BUILD_DIRECTORY}/ncurses"
 # temporary compat fix for the old build system
@@ -16,8 +15,8 @@ export NCURSES_DIR="/$(cc -dumpmachine)/usr"
 
 # NOTE: ncurses require second compiler for the build machine arch when cross-compiling
 build_ncurses() (
-  curl -sLo 'ncurses.tar.gz' "${NCURSES_URL}"
-  common::extract 'ncurses.tar.gz' "${NCURSES_BUILD_DIR}"
+  curl -sLo "${NCURSES_ARCHIVE}" "${NCURSES_URL}"
+  common::extract "${NCURSES_ARCHIVE}" "${NCURSES_BUILD_DIR}"
   common::safe_cd "${NCURSES_BUILD_DIR}"
 
   CMD="CFLAGS=\"${GCC_OPTS}\" "

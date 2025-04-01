@@ -8,14 +8,15 @@ set -o pipefail
 . "${GITHUB_WORKSPACE}/build/libs/build_ncurses.sh"
 . "${GITHUB_WORKSPACE}/build/libs/build_libevent.sh"
 
-TMUX_VERSION="${TMUX_VERSION:-3.1c}"
-TMUX_URL="https://github.com/tmux/tmux/archive/refs/tags/${TMUX_VERSION}.tar.gz"
+TMUX_VERSION="${TMUX_VERSION:-3.5a}"
+TMUX_ARCHIVE="${TMUX_VERSION}.tar.gz"
+TMUX_URL="https://github.com/tmux/tmux/archive/refs/tags/${TMUX_ARCHIVE}"
 TMUX_BUILD_DIR="${BUILD_DIRECTORY}/tmux"
 
 
 build_tmux() (
-  curl -sLo 'tmux.tar.gz' "${TMUX_URL}"
-  common::extract 'tmux.tar.gz' "${TMUX_BUILD_DIR}"
+  curl -sLo "${TMUX_ARCHIVE}" "${TMUX_URL}"
+  common::extract "${TMUX_ARCHIVE}" "${TMUX_BUILD_DIR}"
   common::safe_cd "${TMUX_BUILD_DIR}"
   ./autogen.sh
   CFLAGS="${GCC_OPTS}" \

@@ -1,7 +1,5 @@
 #!/bin/bash
-set -e
-set -x
-set -o pipefail
+set -euxo pipefail
 
 . "${GITHUB_WORKSPACE}/build/common_lib.sh"
 . "${GITHUB_WORKSPACE}/build/build_lib.sh"
@@ -18,8 +16,9 @@ get_openssl_arch() (
 )
 
 # Ordinary OpenSSL.
-OPENSSL_VERSION="${OPENSSL_VERSION:-1_1_1k}"
-OPENSSL_URL="https://github.com/openssl/openssl/archive/refs/tags/OpenSSL_${OPENSSL_VERSION}.tar.gz"
+OPENSSL_VERSION="${OPENSSL_VERSION:-1_1_1w}"
+OPENSSL_ARCHIVE="OpenSSL_${OPENSSL_VERSION}.tar.gz"
+OPENSSL_URL="https://github.com/openssl/openssl/archive/refs/tags/${OPENSSL_ARCHIVE}"
 OPENSSL_BUILD_DIR="${BUILD_DIRECTORY}/openssl-src"
 export OPENSSL_DIR="${BUILD_DIRECTORY}/openssl"
 
@@ -27,8 +26,8 @@ export OPENSSL_DIR="${BUILD_DIRECTORY}/openssl"
 #OPENSSL_GIT='https://github.com/drwetter/openssl-pm-snapshot.git'
 
 build_openssl() (
-  curl -sLo 'openssl.tar.gz' "${OPENSSL_URL}"
-  common::extract 'openssl.tar.gz' "${OPENSSL_BUILD_DIR}"
+  curl -sLo "${OPENSSL_ARCHIVE}" "${OPENSSL_URL}"
+  common::extract "${OPENSSL_ARCHIVE}" "${OPENSSL_BUILD_DIR}"
   common::safe_cd "${OPENSSL_BUILD_DIR}"
 
   CFLAGS="${GCC_OPTS}" \
