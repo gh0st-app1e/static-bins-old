@@ -47,8 +47,8 @@ main() (
   cp "${SOCAT_BUILD_DIR}/socat" "${OUTPUT_DIRECTORY}/socat-${SOCAT_VERSION}"
   echo "[+] Finished building socat for ${CURRENT_ARCH}"
 
-  echo ::set-output name=PACKAGED_NAME::"socat-${SOCAT_VERSION}-${CURRENT_ARCH}"
-  echo ::set-output name=PACKAGED_NAME_PATH::"${OUTPUT_DIRECTORY}/*"
+  echo "PACKAGED_NAME=socat-${SOCAT_VERSION}-${CURRENT_ARCH}" >> "${GITHUB_OUTPUT}"
+  echo "PACKAGED_NAME_PATH=${OUTPUT_DIRECTORY}/*" >> "${GITHUB_OUTPUT}"
 )
 
 main "$@"

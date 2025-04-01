@@ -151,8 +151,8 @@ main() (
   cp "${HYDRA_BUILD_DIR}/hydra" "${OUTPUT_DIRECTORY}/hydra-${HYDRA_VERSION}"
   echo "[+] Finished building hydra for ${CURRENT_ARCH}"
 
-  echo ::set-output name=PACKAGED_NAME::"hydra-${HYDRA_VERSION}-${CURRENT_ARCH}"
-  echo ::set-output name=PACKAGED_NAME_PATH::"${OUTPUT_DIRECTORY}/*"
+  echo "PACKAGED_NAME=hydra-${HYDRA_VERSION}-${CURRENT_ARCH}" >> "${GITHUB_OUTPUT}"
+  echo "PACKAGED_NAME_PATH=${OUTPUT_DIRECTORY}/*" >> "${GITHUB_OUTPUT}"
 )
 
 main "$@"

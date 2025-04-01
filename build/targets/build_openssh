@@ -46,8 +46,8 @@ main() (
   cp "${OPENSSH_BUILD_DIR}/sshd" "${OUTPUT_DIRECTORY}/sshd-${OPENSSH_VERSION}"
   echo "[+] Finished building OpenSSH for ${CURRENT_ARCH}"
 
-  echo ::set-output name=PACKAGED_NAME::"openssh-${OPENSSH_VERSION}-${CURRENT_ARCH}"
-  echo ::set-output name=PACKAGED_NAME_PATH::"${OUTPUT_DIRECTORY}/*"
+  echo "PACKAGED_NAME=openssh-${OPENSSH_VERSION}-${CURRENT_ARCH}" >> "${GITHUB_OUTPUT}"
+  echo "PACKAGED_NAME_PATH=${OUTPUT_DIRECTORY}/*" >> "${GITHUB_OUTPUT}"
 )
 
 main "$@"

@@ -48,8 +48,8 @@ main() (
   cp "${TMUX_BUILD_DIR}/tmux" "${OUTPUT_DIRECTORY}/tmux-${TMUX_VERSION}"
   echo "[+] Finished building tmux for ${CURRENT_ARCH}"
 
-  echo ::set-output name=PACKAGED_NAME::"tmux-${TMUX_VERSION}-${CURRENT_ARCH}"
-  echo ::set-output name=PACKAGED_NAME_PATH::"${OUTPUT_DIRECTORY}/*"
+  echo "PACKAGED_NAME=tmux-${TMUX_VERSION}-${CURRENT_ARCH}" >> "${GITHUB_OUTPUT}"
+  echo "PACKAGED_NAME_PATH=${OUTPUT_DIRECTORY}/*" >> "${GITHUB_OUTPUT}"
 )
 
 main "$@"

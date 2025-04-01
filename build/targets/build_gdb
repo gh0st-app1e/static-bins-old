@@ -127,8 +127,8 @@ main() (
   cp "${GDB_BUILD_DIR}/gdbserver/gdbserver" "${OUTPUT_DIRECTORY}/gdbserver-${GDB_VERSION}"
   echo "[+] Finished building GDB for ${CURRENT_ARCH}"
 
-  echo ::set-output name=PACKAGED_NAME::"gdb-${GDB_VERSION}-${CURRENT_ARCH}"
-  echo ::set-output name=PACKAGED_NAME_PATH::"${OUTPUT_DIRECTORY}/*"
+  echo "PACKAGED_NAME=gdb-${GDB_VERSION}-${CURRENT_ARCH}" >> "${GITHUB_OUTPUT}"
+  echo "PACKAGED_NAME_PATH=${OUTPUT_DIRECTORY}/*" >> "${GITHUB_OUTPUT}"
 )
 
 main "$@"
