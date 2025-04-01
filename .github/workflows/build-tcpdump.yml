@@ -8,7 +8,7 @@ jobs:
     container: muslcc/x86_64:i686-linux-musl
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -21,7 +21,7 @@ jobs:
         run: bash "$GITHUB_WORKSPACE/build/targets/build_tcpdump" x86
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.build_tcpdump.outputs.PACKAGED_NAME }}
           path: ${{ steps.build_tcpdump.outputs.PACKAGED_NAME_PATH }}
@@ -32,7 +32,7 @@ jobs:
     container: muslcc/x86_64:x86_64-linux-musl
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -45,7 +45,7 @@ jobs:
         run: bash "$GITHUB_WORKSPACE/build/targets/build_tcpdump" x86-64
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.build_tcpdump.outputs.PACKAGED_NAME }}
           path: ${{ steps.build_tcpdump.outputs.PACKAGED_NAME_PATH }}
@@ -56,7 +56,7 @@ jobs:
     container: muslcc/x86_64:arm-linux-musleabihf
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -69,7 +69,7 @@ jobs:
         run: bash "$GITHUB_WORKSPACE/build/targets/build_tcpdump" armhf
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.build_tcpdump.outputs.PACKAGED_NAME }}
           path: ${{ steps.build_tcpdump.outputs.PACKAGED_NAME_PATH }}
@@ -80,7 +80,7 @@ jobs:
     container: muslcc/x86_64:aarch64-linux-musl
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -93,7 +93,7 @@ jobs:
         run: bash "$GITHUB_WORKSPACE/build/targets/build_tcpdump" aarch64
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.build_tcpdump.outputs.PACKAGED_NAME }}
           path: ${{ steps.build_tcpdump.outputs.PACKAGED_NAME_PATH }}
